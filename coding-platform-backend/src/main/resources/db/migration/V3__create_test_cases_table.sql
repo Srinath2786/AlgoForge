@@ -1,0 +1,6 @@
+CREATE TABLE test_cases (id BIGSERIAL PRIMARY KEY, 
+problem_id BIGINT NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
+ input TEXT NOT NULL, expected_output TEXT NOT NULL,
+  is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
+   description VARCHAR(255), 
+   time_limit_ms INTEGER NOT NULL DEFAULT 5000);
