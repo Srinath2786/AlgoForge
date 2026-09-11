@@ -13,6 +13,7 @@ import com.codingplatform.user.dto.DashboardStats;
 import com.codingplatform.user.dto.UpdateProfileRequest;
 import com.codingplatform.user.dto.UserDto;
 import com.codingplatform.user.entity.AppUser;
+import com.codingplatform.user.mapper.UserMapper;
 import com.codingplatform.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final SubmissionRepository submissionRepository;
     private final LeaderboardRepository leaderboardRepository;
+    private final UserMapper userMapper;
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -105,8 +107,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserDto toDto(AppUser user) {
-        return new UserDto(user.getId(), user.getUsername(), user.getEmail(), user.getRole(),
-                user.isEnabled(), user.getCreatedAt(), user.getFullName(), user.getBio(), user.getAvatarUrl(),
-                user.getWebsite(), user.getLinkedIn(), user.getGithub(), user.getLocation());
+        return userMapper.toDto(user);
     }
 }

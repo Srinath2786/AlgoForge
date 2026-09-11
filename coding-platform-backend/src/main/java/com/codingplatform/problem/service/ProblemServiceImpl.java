@@ -10,8 +10,10 @@ import com.codingplatform.problem.dto.ProblemRequest;
 import com.codingplatform.problem.dto.ProblemResponse;
 import com.codingplatform.problem.entity.Difficulty;
 import com.codingplatform.problem.entity.Problem;
+import com.codingplatform.problem.mapper.ProblemMapper;
 import com.codingplatform.problem.repository.ProblemRepository;
 import com.codingplatform.testcase.dto.TestCaseDto;
+import com.codingplatform.testcase.mapper.TestCaseMapper;
 import com.codingplatform.testcase.repository.TestCaseRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ public class ProblemServiceImpl implements ProblemService {
 
     private final ProblemRepository problemRepository;
     private final TestCaseRepository testCaseRepository;
+    private final ProblemMapper problemMapper;
+    private final TestCaseMapper testCaseMapper;
 
     @Override
     public ProblemResponse createProblem(ProblemRequest request) {
@@ -106,33 +110,9 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemResponse convertToResponse(Problem problem) {
         // Public problem responses must never expose judge-only hidden test cases.
         List<TestCaseDto> testCases = testCaseRepository.findByProblemIdAndHiddenFalse(problem.getId()).stream()
-                .map(tc -> new TestCaseDto(
-                        tc.getId(),
-                        tc.getInput(),
-                        tc.getExpectedOutput(),
-                        tc.isHidden(),
-                        tc.getDescription(),
-                        tc.getTimeLimitMs()))
+                .map(testCaseMapper::toDto)
                 .toList();
 
-        return new ProblemResponse(
-                problem.getId(),
-                problem.getTitle(),
-                problem.getDescription(),
-                problem.getConstraints(),
-                problem.getExamples(),
-                problem.getDifficulty(),
-                problem.getTopic(),
-                problem.getTags(),
-                testCases,
-                problem.getCreatedAt(),
-                problem.getStarterCodeJava(),
-                problem.getStarterCodePython(),
-                problem.getStarterCodeCpp(),
-                problem.getStarterCodeJavascript(),
-                problem.getEditorial(),
-                problem.getHints(),
-                problem.getEditorialUnlockAttempts()
-        );
+        return problemMapper.toResponse(problem, testCases);
     }
 }

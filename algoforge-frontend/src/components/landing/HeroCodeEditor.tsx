@@ -1,11 +1,5 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, Circle, Loader2 } from "lucide-react";
-
-const CODE_LINES = [
-  { t: "class", c: "text-violet" },
-  { t: " Solution {", c: "text-ink" },
-];
 
 const SNIPPET = `public int[] twoSum(int[] nums, int target) {
     Map<Integer, Integer> seen = new HashMap<>();
@@ -18,21 +12,6 @@ const SNIPPET = `public int[] twoSum(int[] nums, int target) {
     }
     return new int[0];
 }`;
-
-function useTypewriter(text: string, speed = 18) {
-  const [out, setOut] = useState("");
-  useEffect(() => {
-    setOut("");
-    let i = 0;
-    const id = setInterval(() => {
-      i++;
-      setOut(text.slice(0, i));
-      if (i >= text.length) clearInterval(id);
-    }, speed);
-    return () => clearInterval(id);
-  }, [text, speed]);
-  return out;
-}
 
 function highlight(line: string) {
   return line
@@ -49,8 +28,7 @@ const TESTS = [
 ];
 
 export function HeroCodeEditor() {
-  const typed = useTypewriter(SNIPPET, 14);
-  const lines = typed.split("\n");
+  const lines = SNIPPET.split("\n");
 
   return (
     <motion.div

@@ -116,6 +116,11 @@ export default function ProblemDetailPage() {
     enabled: !!id,
   });
 
+  const solvedProblemsQuery = useQuery({
+    queryKey: ["solved-problems"],
+    queryFn: submissionService.getSolvedProblemIds,
+  });
+
   const testCasesQuery = useQuery({
     queryKey: ["testcases", id],
     queryFn: () => problemService.getVisibleTestCases(id),
@@ -172,8 +177,12 @@ export default function ProblemDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ["all-testcases", id] });
       resetTestCaseDraft();
       toast.success(editingTestCaseId !== null ? "Test case updated" : "Test case created");
-    } catch (err: any) {
-      setTestCaseError(err?.response?.data?.message || "Couldn't save this test case.");
+    } catch (err: unknown) {
+      const message =
+        typeof err === "object" && err !== null && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      setTestCaseError(message || "Couldn't save this test case.");
     } finally {
       setSavingTestCase(false);
     }
@@ -188,8 +197,12 @@ export default function ProblemDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ["all-testcases", id] });
       if (editingTestCaseId === testCaseId) resetTestCaseDraft();
       toast.success("Test case deleted");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Couldn't delete the test case.");
+    } catch (err: unknown) {
+      const message =
+        typeof err === "object" && err !== null && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || "Couldn't delete the test case.");
     }
   }
 
@@ -226,20 +239,28 @@ export default function ProblemDetailPage() {
 
       if (action === "submit") {
         if (res.status === "ACCEPTED") {
+          queryClient.setQueryData<number[]>(["solved-problems"], (current) => {
+            const next = new Set(current ?? []);
+            next.add(Number(id));
+            return Array.from(next);
+          });
           toast.success("Accepted - all test cases passed");
         } else {
           toast.error(res.status.replace(/_/g, " "));
         }
         queryClient.invalidateQueries({ queryKey: ["submissions", "mine"] });
+        queryClient.invalidateQueries({ queryKey: ["solved-problems"] });
         queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
         queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         queryClient.invalidateQueries({ queryKey: ["dashboard", "activity"] });
       } else {
         toast.success("Run complete");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const message =
-        err?.response?.data?.message ||
+        (typeof err === "object" && err !== null && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined) ||
         "Couldn't reach the backend. Confirm it's running and Docker is available.";
       toast.error(message);
     } finally {
@@ -250,6 +271,8 @@ export default function ProblemDetailPage() {
   const problem = problemQuery.data;
   const testCases = testCasesQuery.data ?? [];
   const allTestCases = allTestCasesQuery.data ?? [];
+  const solvedProblemIds = new Set(solvedProblemsQuery.data ?? []);
+  const isSolved = problem ? solvedProblemIds.has(problem.id) || result?.status === "ACCEPTED" : false;
   const meta = result ? statusMeta(result.status) : null;
   const todayIndex = getTodayIndex();
   const challengeDay = problem
@@ -287,6 +310,11 @@ export default function ProblemDetailPage() {
           <Card className="p-6">
             <div className="flex flex-wrap items-center gap-2">
               <Badge className={difficultyColor(problem.difficulty)}>{problem.difficulty}</Badge>
+              {isSolved && (
+                <Badge className="border-cyan/30 bg-cyan/10 text-cyan">
+                  <CheckCircle2 size={11} className="mr-1" /> Solved
+                </Badge>
+              )}
               {challengeDayNum != null && (
                 <Badge className="border-forge/30 bg-forge/10 text-forge">
                   <Flame size={11} className="mr-0.5" />

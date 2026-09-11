@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Code2, Trophy, History, BarChart3, Settings, LogOut, CalendarDays, ShieldCheck, ListChecks,
+  LayoutDashboard, Code2, History, BarChart3, Settings, LogOut, CalendarDays, ShieldCheck, ListChecks,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { cn } from "@/lib/utils";

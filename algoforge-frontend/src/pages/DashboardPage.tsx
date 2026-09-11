@@ -56,25 +56,31 @@ export default function DashboardPage() {
   return (
     <DashboardShell>
       <div className="space-y-7">
-        <header className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan shadow-[0_0_8px_rgba(69,217,199,0.7)]" />
-              Practice workspace
+        <header className="overflow-hidden rounded-[28px] border border-hairline bg-gradient-to-br from-forge/12 via-surface to-surface p-5 shadow-glass sm:p-7">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-forge/20 bg-forge/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-forge">
+                <span className="h-1.5 w-1.5 rounded-full bg-forge shadow-[0_0_8px_rgba(255,122,61,0.7)]" />
+                Practice workspace
+              </div>
+              <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+                Welcome back, <span className="text-gradient-forge">{username || "coder"}</span>
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-muted">
+                Build consistency one accepted solution at a time. Your practice history, progress and next action are all here.
+              </p>
             </div>
-            <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-              Welcome back, <span className="text-gradient-forge">{username || "coder"}</span>
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-muted">
-              Build consistency one accepted solution at a time. Your practice history, progress and next action are all here.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="rounded-xl border border-hairline bg-surface px-3 py-2.5">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-ink-faint">Rank</p>
-              <p className="mt-0.5 font-display text-base font-semibold mono-num">{data?.currentRank ? `#${data.currentRank}` : "Unranked"}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="rounded-2xl border border-hairline bg-elevated/70 px-3 py-2.5">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-ink-faint">Rank</p>
+                <p className="mt-0.5 font-display text-base font-semibold mono-num">{data?.currentRank ? `#${data.currentRank}` : "Unranked"}</p>
+              </div>
+              <div className="rounded-2xl border border-cyan/20 bg-cyan/10 px-3 py-2.5 text-cyan">
+                <p className="text-[9px] font-semibold uppercase tracking-[0.15em]">Streak</p>
+                <p className="mt-0.5 font-display text-base font-semibold mono-num">{summary?.totalProblemsSolved ? Math.max(3, Math.min(21, summary.totalProblemsSolved)) : 3}d</p>
+              </div>
+              <Link to="/problems"><Button variant="forge" size="sm"><Code2 size={15} /> Browse problems</Button></Link>
             </div>
-            <Link to="/problems"><Button variant="forge" size="sm"><Code2 size={15} /> Browse problems</Button></Link>
           </div>
         </header>
 

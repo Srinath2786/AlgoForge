@@ -33,7 +33,7 @@ export default function LeaderboardPage() {
     queryFn: () => leaderboardService.getAll({ page, size: 25 }),
   });
 
-  const entries = data?.content ?? [];
+  const entries = useMemo(() => data?.content ?? [], [data?.content]);
 
   const metrics = useMemo(() => {
     const averageScore =

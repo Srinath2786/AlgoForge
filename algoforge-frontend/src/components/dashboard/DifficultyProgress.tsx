@@ -32,8 +32,8 @@ export function DifficultyProgress({ easy, medium, hard }: Props) {
         </div>
         <span className="rounded-lg border border-hairline bg-surface px-2.5 py-1.5 text-xs font-semibold mono-num">{total} solved</span>
       </div>
-      <div className="mt-6 flex items-center gap-5 rounded-2xl border border-hairline bg-surface/55 p-4">
-        <div className="relative h-24 w-24 shrink-0 rounded-full p-2" style={{ background: distribution }}>
+      <div className="mt-6 flex flex-col gap-5 rounded-2xl border border-hairline bg-surface/55 p-4 sm:flex-row sm:items-center">
+        <div className="relative mx-auto h-24 w-24 shrink-0 rounded-full p-2 sm:mx-0" style={{ background: distribution }}>
           <div className="flex h-full w-full flex-col items-center justify-center rounded-full border border-hairline bg-elevated">
             <span className="font-display text-xl font-semibold mono-num">{total}</span>
             <span className="text-[9px] uppercase tracking-[0.14em] text-ink-faint">solved</span>

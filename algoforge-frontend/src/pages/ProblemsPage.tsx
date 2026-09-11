@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Loader2, ChevronRight, ChevronLeft, Settings2 } from "lucide-react";
+import { Search, Loader2, ChevronRight, ChevronLeft, Settings2, CheckCircle2 } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { problemService } from "@/lib/services/problems";
+import { submissionService } from "@/lib/services/submissions";
 import { useAuthStore } from "@/store/auth-store";
 import { difficultyColor, cn } from "@/lib/utils";
 import { Difficulty } from "@/types/api";
@@ -32,6 +33,13 @@ export default function ProblemsPage() {
         size: 12,
       }),
   });
+
+  const solvedProblemsQuery = useQuery({
+    queryKey: ["solved-problems"],
+    queryFn: submissionService.getSolvedProblemIds,
+  });
+
+  const solvedProblemIds = new Set(solvedProblemsQuery.data ?? []);
 
   return (
     <DashboardShell>
@@ -135,9 +143,16 @@ export default function ProblemsPage() {
                       ))}
                   </div>
                 </div>
-                <Badge className={cn("shrink-0", difficultyColor(p.difficulty))}>
-                  {p.difficulty}
-                </Badge>
+                <div className="flex items-center gap-2 shrink-0">
+                  {solvedProblemIds.has(p.id) && (
+                    <Badge className="border-cyan/30 bg-cyan/10 text-cyan">
+                      <CheckCircle2 size={12} className="mr-1" /> Solved
+                    </Badge>
+                  )}
+                  <Badge className={cn("shrink-0", difficultyColor(p.difficulty))}>
+                    {p.difficulty}
+                  </Badge>
+                </div>
                 <ChevronRight size={16} className="shrink-0 text-ink-faint" />
               </Link>
             ))}

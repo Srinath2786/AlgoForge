@@ -6,13 +6,8 @@ import {
   Compass,
   LayoutDashboard,
   Trophy,
-  Shield,
-  Cpu,
-  Play,
   CheckCircle2,
   BarChart3,
-  Sparkles,
-  Zap,
   TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";

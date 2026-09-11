@@ -37,7 +37,7 @@ export default function SubmissionsPage() {
     queryFn: () => submissionService.getMine({ page, size: 15 }),
   });
 
-  const submissions = data?.content ?? [];
+  const submissions = useMemo(() => data?.content ?? [], [data?.content]);
 
   const metrics = useMemo(() => {
     const accepted = submissions.filter((s) => s.status === "ACCEPTED").length;

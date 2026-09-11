@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 import { problemService } from "@/lib/services/problems";
 import { useWeekSchedule } from "@/components/challenges/useWeekSchedule";
 import { DAY_LABELS_FULL, getDateForDay, setDayProblem } from "@/lib/services/challenges";
-import { difficultyColor, cn } from "@/lib/utils";
+import { difficultyColor } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function AdminChallengesPage() {

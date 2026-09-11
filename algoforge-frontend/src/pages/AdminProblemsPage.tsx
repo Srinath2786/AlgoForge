@@ -116,8 +116,12 @@ export default function AdminProblemsPage() {
       await queryClient.invalidateQueries({ queryKey: ["problems"] });
       resetDraft();
       setFormOpen(false);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Couldn't save the problem.");
+    } catch (err: unknown) {
+      const message =
+        typeof err === "object" && err !== null && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      setError(message || "Couldn't save the problem.");
     } finally {
       setSaving(false);
     }
@@ -132,8 +136,12 @@ export default function AdminProblemsPage() {
       await queryClient.invalidateQueries({ queryKey: ["problems"] });
       if (editingId === problemId) resetDraft();
       toast.success("Problem deleted");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Couldn't delete the problem.");
+    } catch (err: unknown) {
+      const message =
+        typeof err === "object" && err !== null && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || "Couldn't delete the problem.");
     }
   }
 

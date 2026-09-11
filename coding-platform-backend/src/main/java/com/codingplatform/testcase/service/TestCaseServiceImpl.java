@@ -4,13 +4,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.codingplatform.testcase.dto.TestCaseDto;
-import com.codingplatform.testcase.dto.TestCaseRequest;
-import com.codingplatform.testcase.entity.TestCase;
-import com.codingplatform.testcase.repository.TestCaseRepository;
 import com.codingplatform.exception.ResourceNotFoundException;
 import com.codingplatform.problem.entity.Problem;
 import com.codingplatform.problem.repository.ProblemRepository;
+import com.codingplatform.testcase.dto.TestCaseDto;
+import com.codingplatform.testcase.dto.TestCaseRequest;
+import com.codingplatform.testcase.entity.TestCase;
+import com.codingplatform.testcase.mapper.TestCaseMapper;
+import com.codingplatform.testcase.repository.TestCaseRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,7 @@ public class TestCaseServiceImpl implements TestCaseService {
 
     private final TestCaseRepository testCaseRepository;
     private final ProblemRepository problemRepository;
+    private final TestCaseMapper testCaseMapper;
 
     @Override
     public List<TestCaseDto> getVisibleByProblem(Long problemId) {
@@ -77,7 +79,6 @@ public class TestCaseServiceImpl implements TestCaseService {
     }
 
     private TestCaseDto toDto(TestCase tc) {
-        return new TestCaseDto(tc.getId(), tc.getInput(), tc.getExpectedOutput(),
-                tc.isHidden(), tc.getDescription(), tc.getTimeLimitMs());
+        return testCaseMapper.toDto(tc);
     }
 }
