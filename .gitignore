@@ -1,0 +1,45 @@
+# Node / frontend
+node_modules/
+algoforge-frontend/node_modules/
+algoforge-frontend/dist/
+algoforge-frontend/.vite/
+algoforge-frontend/.env
+algoforge-frontend/.env.*
+
+# Java / backend
+coding-platform-backend/target/
+**/target/
+**/.classpath
+**/.project
+**/.settings/
+**/.idea/
+**/.vscode/
+*.class
+*.log
+*.jar
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Docker / local runtime
+*.pid
+*.tmp
+*.swp
+
+# Environment files
+.env
+.env.*
+
+# Database / local data
+*.db
+*.sqlite
+
+# Test reports
+**/surefire-reports/
+**/failsafe-reports/
+
+# Misc
+coverage/
+.npm/
