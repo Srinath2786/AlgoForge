@@ -1,183 +1,187 @@
 # AlgoForge
 
-AlgoForge is a coding practice and assessment platform with a React frontend and a Java Spring Boot backend. It includes user authentication, problem browsing, admin management, code submission, sandboxed execution, and a leaderboard.
+AlgoForge is a full-stack coding-practice platform where developers can solve algorithm problems, run code in an isolated environment, submit against hidden test cases, track progress, and compete on a leaderboard.
 
-## Project structure
+It is built as a modular React + Spring Boot application with PostgreSQL, Flyway schema migrations, JWT authentication, and Docker-based code execution.
 
-- `algoforge-frontend/` — Vite + React + TypeScript app
-- `coding-platform-backend/` — Spring Boot REST API + PostgreSQL + Docker execution sandbox
+## Highlights
 
-## Tech stack
+- Solve problems in Java, Python, C++, and JavaScript
+- Run sample tests or submit against visible and hidden judge cases
+- Docker-isolated code execution with network, memory, CPU, PID, and filesystem limits
+- JWT authentication and role-based user/admin access
+- Admin problem and test-case management
+- Weekly challenges shared across every user and device
+- Dashboard, activity graph, profile, submissions, and leaderboard
+- Responsive workspace with independently scrollable problem and editor panels on desktop
+
+## System architecture
+
+```text
+React + Vite frontend (localhost:5173)
+        |
+        | HTTPS / REST + JWT
+        v
+Spring Boot REST API (localhost:8080)
+        |                 |
+        v                 v
+PostgreSQL + Flyway   Docker execution sandbox
+```
 
 ### Frontend
-- React 18
-- Vite
-- TypeScript
-- Tailwind CSS
-- React Router
-- Axios
-- Zustand + React Query
-- Monaco editor support via `@monaco-editor/react`
+
+`algoforge-frontend/` is a React 18 + TypeScript application powered by Vite.
+
+- `src/pages/` — application routes and feature screens
+- `src/components/` — reusable UI, dashboard, landing, and challenge components
+- `src/lib/services/` — typed REST API clients
+- `src/store/` — Zustand authentication and theme state
+- `src/types/` — frontend API contracts
 
 ### Backend
-- Java 17
-- Spring Boot 3.5
-- Spring Security + JWT
-- Spring Data JPA
-- PostgreSQL
-- Flyway migrations
-- Swagger / OpenAPI
-- Docker-based code execution for Java, Python, C++, and JavaScript
 
-## How the app works
+`coding-platform-backend/` is a Java 17 Spring Boot API.
 
-1. The frontend loads the landing/login/register screens and routes users based on auth state.
-2. When a user logs in, the backend returns a JWT token.
-3. The frontend stores the token and sends it in the `Authorization: Bearer ...` header on every request.
-4. Spring Security validates the token and protects protected/admin routes.
-5. Problem and leaderboard pages fetch data from the backend.
-6. When a user submits code, the backend stores the submission and runs it inside a Docker sandbox for secure, isolated execution.
-7. Results are compared against expected outputs and stored for display in the submission detail page.
+- `auth/` — registration and login
+- `security/` — JWT authentication, roles, and route protection
+- `problem/` and `testcase/` — problem catalog and judge test cases
+- `submission/`, `submissionresult/`, and `execution/` — grading workflow
+- `docker/` — isolated compile/run container management
+- `dashboard/`, `leaderboard/`, and `challenge/` — learner progress and competition features
+- `user/` — profile and admin user management
+- `resources/db/migration/` — versioned Flyway database migrations
 
-## Why these technologies were chosen
+### Database
 
-- React + Vite gives a fast developer experience and a modern SPA.
-- Tailwind helps build a clean UI quickly without a heavy component library.
-- Spring Boot reduces boilerplate for building secure, production-ready REST APIs.
-- Spring Security + JWT provide stateless authentication for a web app.
-- PostgreSQL is reliable for relational data such as users, problems, test cases, submissions, and leaderboard entries.
-- Flyway keeps database schema updates controlled and repeatable.
-- Docker is used for code execution because it gives isolation, resource limits, and runtime safety for untrusted user code.
-- Swagger/OpenAPI makes the API easier to test and document.
+PostgreSQL stores users, roles, problems, test cases, submissions, submission results, leaderboard data, and weekly challenges. Flyway applies database changes in order whenever the backend starts.
 
-## Backend setup
+## Technology stack
 
-From the backend folder:
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS, React Query, Zustand, Monaco Editor |
+| Backend | Java 17, Spring Boot 3, Spring Security, Spring Data JPA |
+| Database | PostgreSQL, Flyway |
+| Code execution | Docker, Java, Python, C++, Node.js |
+| API documentation | Swagger UI / OpenAPI |
+
+## Run locally
+
+### Prerequisites
+
+- Node.js 20+
+- Java 17+
+- Maven 3.9+
+- Docker Desktop (running)
+
+### 1. Start PostgreSQL
 
 ```powershell
 cd coding-platform-backend
-```
-
-Start PostgreSQL with Docker:
-
-```powershell
 docker compose up -d postgres
 ```
 
-Set environment variables:
+### 2. Start the backend
 
 ```powershell
+cd coding-platform-backend
 $env:DB_PASSWORD = "postgres"
-$env:JWT_SECRET = "change-this-to-a-real-256-bit-secret"
-$env:SPRING_PROFILES_ACTIVE = "demo" # local demo data and demo admin only
-```
-
-Run the backend:
-
-```powershell
+$env:JWT_SECRET = "replace-this-with-a-long-random-secret"
+$env:SPRING_PROFILES_ACTIVE = "demo"  # local demo problems/admin only
 mvn spring-boot:run
 ```
 
-Or build and run the JAR:
+The API runs at `http://localhost:8080`.
+
+### 3. Start the frontend
+
+Open another terminal:
 
 ```powershell
-mvn clean package -DskipTests
-java -jar target/coding-platform-backend-0.1.0.jar
+cd algoforge-frontend
+npm install
+Copy-Item .env.example .env -ErrorAction SilentlyContinue
+npm run dev
 ```
 
-Backend URLs:
+Open `http://localhost:5173`.
 
-- API root: `http://localhost:8080/api`
+Set `VITE_API_BASE_URL=http://localhost:8080` in `algoforge-frontend/.env` when needed.
+
+## REST API
+
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI docs: `http://localhost:8080/v3/api-docs`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
-## Frontend setup
+Send authenticated requests with:
 
-From the frontend folder:
+```http
+Authorization: Bearer <JWT_TOKEN>
+```
+
+| Area | Endpoints | Access |
+| --- | --- | --- |
+| Authentication | `POST /api/auth/register`, `POST /api/auth/login` | Public |
+| Problems | `GET /api/problems`, `GET /api/problems/{id}` | Public |
+| Problem administration | `POST/PUT/DELETE /api/problems` | Admin |
+| Test cases | `GET /api/problems/{id}/testcases` | Public, visible cases only |
+| Test-case administration | `GET /all`, `POST`, `PUT`, `DELETE /api/problems/{id}/testcases...` | Admin only |
+| Submissions | `POST /api/submissions`, `GET /api/submissions/me`, `GET /api/submissions/{id}` | Authenticated |
+| Hints/editorial | `GET /api/problems/{id}/hints`, `/editorial` | Authenticated |
+| Dashboard | `GET /api/dashboard`, `/api/dashboard/activity` | Authenticated |
+| Challenges | `GET /api/challenges/weekly` | Authenticated |
+| Challenge administration | `PUT/DELETE /api/challenges/weekly/{dayOfWeek}` | Admin |
+| Users | `GET /api/users/me`, `PUT /api/users/me/profile` | Authenticated |
+| Leaderboard | `GET /api/leaderboard` | Public |
+
+`POST /api/submissions` supports both actions: use `sampleRunOnly: true` for a sample run or `false` for an official submission.
+
+## Security model
+
+- Passwords are hashed through Spring Security.
+- JWT secures authenticated routes.
+- Admin endpoints require the `ADMIN` role in both the frontend and backend.
+- Hidden test cases are never returned by public problem endpoints.
+- Execution containers use disabled network access, a read-only root filesystem, an unprivileged user, memory/CPU/PID limits, and execution timeouts.
+- Demo data is restricted to the `demo` profile; do not use it in production.
+
+## Testing and build
 
 ```powershell
+# Frontend
 cd algoforge-frontend
-npm install
-```
+npm run build
 
-Create a local environment file if needed:
-
-```env
-VITE_API_BASE_URL=http://localhost:8080
-```
-
-Run the app:
-
-```powershell
-npm run dev
-```
-
-Frontend URL:
-
-- `http://localhost:5173`
-
-## Main backend API areas
-
-- Auth: `/api/auth/register`, `/api/auth/login`
-- Problems: `/api/problems`
-- Test cases: `/api/problems/{problemId}/testcases`
-- Submissions: `/api/submissions`
-- Leaderboard: `/api/leaderboard`
-- Dashboard: `/api/dashboard`
-- User endpoints: `/api/users`, `/api/admin/users`
-
-## REST API reference
-
-Interactive documentation: `http://localhost:8080/swagger-ui.html`  
-OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-
-The table below reflects endpoints implemented in this repository. An authenticated request uses `Authorization: Bearer <JWT>`.
-
-| Area | Method | Endpoint | Access | Purpose |
-| --- | --- | --- | --- | --- |
-| Auth | POST | `/api/auth/register` | Public | Register an account |
-| Auth | POST | `/api/auth/login` | Public | Log in and receive a JWT |
-| Problems | GET | `/api/problems?search=&difficulty=&page=&size=` | Public | Browse and filter problems |
-| Problems | GET | `/api/problems/{id}` | Public | Read a problem and its visible test cases |
-| Problems | POST/PUT/DELETE | `/api/problems`, `/api/problems/{id}` | Admin | Manage problems |
-| Test cases | GET | `/api/problems/{id}/testcases` | Public | Read visible test cases |
-| Test cases | GET/POST/PUT/DELETE | `/api/problems/{id}/testcases/all`, `/api/problems/{id}/testcases...` | Admin | Manage all test cases, including hidden ones |
-| Submissions | POST | `/api/submissions` | Authenticated | Run (`sampleRunOnly: true`) or submit (`false`) source code |
-| Submissions | GET | `/api/submissions/me`, `/api/submissions/{id}`, `/api/submissions/{id}/results` | Authenticated | Read personal submission history and verdict details |
-| Submissions | GET | `/api/submissions/me/solved-problems` | Authenticated | Read solved problem IDs |
-| Hints | GET | `/api/problems/{id}/hints`, `/api/problems/{id}/editorial` | Authenticated | Read hints and conditionally unlocked editorial |
-| Users | GET | `/api/users/me`, `/api/users/me/dashboard` | Authenticated | Read current profile and dashboard statistics |
-| Users | PUT | `/api/users/me/profile` | Authenticated | Update current profile |
-| Leaderboard | GET | `/api/leaderboard` | Public | Read rankings |
-| Dashboard | GET | `/api/dashboard`, `/api/dashboard/activity` | Authenticated | Read dashboard summary and activity |
-| Challenges | GET | `/api/challenges/weekly` | Authenticated | Read the shared weekly challenge schedule |
-| Challenges | PUT/DELETE | `/api/challenges/weekly/{dayOfWeek}` | Admin | Assign or clear a weekday challenge |
-| Admin users | GET | `/api/admin/users` | Admin | Read platform user accounts |
-
-### Planned API groups
-
-`/api/intelligence`, `/api/notes`, `/api/bookmarks`, `/api/admin/metrics`, and `/api/admin/audit-logs` are product roadmap items, not implemented endpoints. They should not be advertised in public API documentation until their data model, authorization rules, and tests are implemented.
-
-## Notes
-
-- The backend reads the database URL from `application.yml`, which defaults to PostgreSQL on `localhost:5432` with database `coding_platform`.
-- Docker execution is enabled by default via `execution.docker.enabled=true`.
-- The frontend uses `http://localhost:8080` as its default backend URL if no environment variable is provided.
-- If you want to run both together, start the backend first, then start the frontend in a separate terminal.
-
-## Recommended local workflow
-
-```powershell
-# Terminal 1: backend
+# Backend
 cd coding-platform-backend
-docker compose up -d postgres
-$env:DB_PASSWORD = "postgres"
-$env:JWT_SECRET = "change-this-to-a-real-256-bit-secret"
-$env:SPRING_PROFILES_ACTIVE = "demo"
-mvn spring-boot:run
-
-# Terminal 2: frontend
-cd algoforge-frontend
-npm install
-npm run dev
+mvn test
+mvn package
 ```
+
+## Git workflow
+
+This local repository is connected to:
+
+`https://github.com/Srinath2786/AlgoForge`
+
+Use feature branches and pull the remote branch before pushing when Git reports a non-fast-forward rejection:
+
+```powershell
+git fetch origin
+git pull --rebase origin main
+git push -u origin main
+```
+
+Resolve any conflicts before continuing the rebase. Never force-push unless you understand which remote commits would be replaced.
+
+## Roadmap
+
+- Structured DSA learning paths and spaced revision
+- Private notes and bookmarks
+- Personalized recommendations and failure analysis
+- Timed contests and private classroom/company rooms
+- Queue-based judge workers for larger-scale execution
+
+## License
+
+No license has been selected yet. Add a `LICENSE` file before publishing the project for public reuse.
