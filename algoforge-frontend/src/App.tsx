@@ -13,6 +13,7 @@ const LeaderboardPage = lazy(() => import("@/pages/LeaderboardPage"));
 const SubmissionsPage = lazy(() => import("@/pages/SubmissionsPage"));
 const SubmissionDetailPage = lazy(() => import("@/pages/SubmissionDetailPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const ChallengesPage = lazy(() => import("@/pages/ChallengesPage"));
 const AdminChallengesPage = lazy(() => import("@/pages/AdminChallengesPage"));
 const AdminDashboardPage = lazy(() => import("@/pages/AdminDashboardPage"));
@@ -38,6 +39,7 @@ export default function App() {
 
         {/* Authenticated (any role) */}
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/problems" element={<ProtectedRoute><ProblemsPage /></ProtectedRoute>} />
         <Route path="/problems/:id" element={<ProtectedRoute><ProblemDetailPage /></ProtectedRoute>} />
         <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />

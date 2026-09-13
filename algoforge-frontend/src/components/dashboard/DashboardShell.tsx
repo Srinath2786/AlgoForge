@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Flame } from "lucide-react";
+import { Menu, X, Flame, SunMedium, MoonStar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
@@ -10,6 +10,7 @@ import {
   LayoutDashboard, Code2, History, BarChart3, Settings, LogOut, CalendarDays, ShieldCheck, ListChecks,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
+import { useThemeStore } from "@/store/theme-store";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -109,6 +110,7 @@ function MobileNav({ onClose }: { onClose: () => void }) {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { ready } = useRequireAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { mode, toggleTheme } = useThemeStore();
 
   if (!ready) {
     return (
@@ -119,8 +121,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-void text-ink">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,122,61,0.08),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(69,217,199,0.08),transparent_26%)]" />
+    <div className="relative min-h-screen overflow-hidden bg-void text-ink">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,122,61,0.12),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(69,217,199,0.09),transparent_25%),radial-gradient(circle_at_center,rgba(140,123,255,0.05),transparent_30%)]" />
       <Sidebar />
 
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-hairline bg-surface/85 px-5 py-3.5 backdrop-blur-xl lg:hidden">
@@ -128,9 +130,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <Flame className="text-forge" size={18} />
           <span className="font-display text-base font-semibold">AlgoForge</span>
         </span>
-        <button onClick={() => setMobileOpen(true)} className="text-ink">
-          <Menu size={22} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-hairline bg-elevated/80 text-ink-muted transition hover:text-ink"
+            aria-label="Toggle theme"
+          >
+            {mode === "dark" ? <SunMedium size={16} /> : <MoonStar size={16} />}
+          </button>
+          <button onClick={() => setMobileOpen(true)} className="text-ink">
+            <Menu size={22} />
+          </button>
+        </div>
       </header>
 
       <AnimatePresence>

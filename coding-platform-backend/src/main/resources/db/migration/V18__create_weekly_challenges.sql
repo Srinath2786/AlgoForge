@@ -1,0 +1,8 @@
+CREATE TABLE weekly_challenges (
+    id BIGSERIAL PRIMARY KEY,
+    day_of_week SMALLINT NOT NULL UNIQUE,
+    problem_id BIGINT NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT weekly_challenges_day_range CHECK (day_of_week BETWEEN 0 AND 6)
+);

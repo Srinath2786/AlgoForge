@@ -118,16 +118,16 @@ export function Hero({
             transition={{ delay: 0.4 }}
             className="mt-10 flex flex-wrap items-center gap-3 text-sm text-ink-faint"
           >
-            <div className="flex items-center gap-1.5 rounded-full border border-hairline bg-surface/70 px-3 py-1.5">
+            <div className="flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <CheckCircle2 size={14} className="text-cyan" />
               Real judge runs
             </div>
-            <div className="flex items-center gap-1.5 rounded-full border border-hairline bg-surface/70 px-3 py-1.5">
+            <div className="flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <BarChart3 size={14} className="text-amber" />
               Live leaderboard
             </div>
             {isLoggedIn && (
-              <div className="flex items-center gap-1.5 rounded-full border border-forge/25 bg-forge/10 px-3 py-1.5 text-forge">
+              <div className="flex items-center gap-1.5 rounded-full border border-forge/25 bg-forge/10 px-3 py-1.5 text-forge shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <Trophy size={14} />
                 Signed in as <span className="font-semibold">{username ?? "coder"}</span>
               </div>

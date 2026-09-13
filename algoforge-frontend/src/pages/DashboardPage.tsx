@@ -110,8 +110,34 @@ export default function DashboardPage() {
               <StatCard label="Current rank" value={data?.currentRank ? `#${data.currentRank}` : "—"} hint="leaderboard" icon={Trophy} tone="violet" />
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.8fr)]">
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.7fr)]">
               <DifficultyProgress easy={summary?.easyProblemsSolved ?? 0} medium={summary?.mediumProblemsSolved ?? 0} hard={summary?.hardProblemsSolved ?? 0} />
+
+              <Card className="p-5 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-faint">Momentum</p>
+                    <h2 className="mt-2 font-display text-xl font-semibold">Keep the streak alive</h2>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-forge/20 bg-forge/10 text-forge">
+                    <Flame size={18} />
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <div className="rounded-2xl border border-hairline bg-surface/70 p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-faint">Target</p>
+                    <p className="mt-2 font-display text-2xl font-semibold mono-num">{Math.max(1, 5 - (summary?.totalProblemsSolved ?? 0) % 5)} more</p>
+                    <p className="mt-1 text-xs text-ink-muted">Solve a few more problems to keep your weekly streak strong.</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-hairline bg-surface/70 p-4">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-faint">Best rhythm</p>
+                    <p className="mt-2 text-sm font-medium text-ink">Practice 1 problem a day</p>
+                    <p className="mt-1 text-xs text-ink-muted">Consistency is worth more than random bursts of effort.</p>
+                  </div>
+                </div>
+              </Card>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)]">

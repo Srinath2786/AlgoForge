@@ -19,7 +19,9 @@ import com.codingplatform.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Component
-@Profile({"test", "default"})
+// Demo content includes a known local admin account. Never load it in an
+// unqualified production runtime; opt in with the `demo` profile instead.
+@Profile({"test", "demo"})
 @RequiredArgsConstructor
 public class ProblemSeedLoader implements CommandLineRunner {
 

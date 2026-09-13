@@ -37,8 +37,30 @@ export default function SubmissionDetailPage() {
   const problemQuery = useQuery({
     queryKey: ["problem", submission?.problemId],
     queryFn: () => problemService.getById(submission!.problemId),
-    enabled: !!submission?.problemId,
+    enabled: submission?.problemId != null,
   });
+
+  const submissionErrorMessage = (() => {
+    const error = submissionQuery.error as { response?: { status?: number; data?: { message?: string } }; message?: string } | null;
+
+    if (error?.response?.status === 401 || error?.response?.status === 403) {
+      return "Your session expired or this submission is not available to your account.";
+    }
+
+    if (error?.response?.status === 404) {
+      return "This submission was not found or it does not belong to your account.";
+    }
+
+    if (error?.response?.data?.message) {
+      return error.response.data.message;
+    }
+
+    if (error?.message) {
+      return error.message;
+    }
+
+    return "Couldn't load this submission from the backend.";
+  })();
 
   if (submissionQuery.isLoading) {
     return (
@@ -54,7 +76,7 @@ export default function SubmissionDetailPage() {
     return (
       <DashboardShell>
         <div className="py-20 text-center text-sm text-danger">
-          Couldn&apos;t load this submission from the backend.
+          {submissionErrorMessage}
         </div>
       </DashboardShell>
     );

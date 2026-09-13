@@ -3,9 +3,11 @@ import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { useAuthStore } from "@/store/auth-store";
+import { useThemeStore } from "@/store/theme-store";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   const hydrate = useAuthStore((state) => state.hydrate);
+  const hydrateTheme = useThemeStore((state) => state.hydrate);
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -21,7 +23,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     hydrate();
-  }, [hydrate]);
+    hydrateTheme();
+  }, [hydrate, hydrateTheme]);
 
   return (
     <QueryClientProvider client={queryClient}>

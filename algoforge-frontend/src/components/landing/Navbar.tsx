@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Flame, Menu, X, LogOut, LayoutDashboard, Sparkles } from "lucide-react";
+import { Flame, Menu, X, LogOut, LayoutDashboard, Sparkles, SunMedium, MoonStar } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/store/auth-store";
+import { useThemeStore } from "@/store/theme-store";
 
 const LINKS = [
   { href: "#features", label: "Features" },
@@ -16,6 +17,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { token, hydrated, hydrate, logout, username } = useAuthStore();
+  const { mode, toggleTheme } = useThemeStore();
   const isLoggedIn = !!token;
 
   useEffect(() => {
@@ -31,11 +33,11 @@ export function Navbar() {
   return (
     <header
       className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-        scrolled ? "glass border-b border-hairline" : "bg-transparent"
+        scrolled ? "glass border-b border-hairline/80" : "bg-transparent"
       }`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-        <Link to="/" className="flex items-center gap-2">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 lg:px-8">
+        <Link to="/" className="flex items-center gap-2 rounded-full border border-white/6 bg-white/[0.02] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm transition-transform duration-200 hover:-translate-y-0.5">
           <span className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-forge/30 bg-forge/15 shadow-[0_0_18px_rgba(255,122,61,0.16)]">
             <Flame className="h-4.5 w-4.5 text-forge" size={18} strokeWidth={2.4} />
           </span>
@@ -57,9 +59,17 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-hairline bg-elevated/70 text-ink-muted transition hover:text-ink"
+            aria-label="Toggle theme"
+          >
+            {mode === "dark" ? <SunMedium size={16} /> : <MoonStar size={16} />}
+          </button>
           {isLoggedIn ? (
             <>
-              <div className="inline-flex items-center gap-2 rounded-full border border-forge/20 bg-forge/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-forge">
+              <div className="inline-flex items-center gap-2 rounded-full border border-forge/20 bg-forge/10 px-2.5 py-1.5 text-[10px] font-semibold text-forge shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <Sparkles size={12} /> {username || "Player"}
               </div>
               <Link to="/dashboard">
@@ -120,7 +130,18 @@ export function Navbar() {
                   {l.label}
                 </a>
               ))}
-              <div className="mt-2 flex gap-3 px-3">
+              <div className="mt-2 flex items-center gap-3 px-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleTheme();
+                    setOpen(false);
+                  }}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-hairline bg-elevated/70 text-ink-muted"
+                  aria-label="Toggle theme"
+                >
+                  {mode === "dark" ? <SunMedium size={16} /> : <MoonStar size={16} />}
+                </button>
                 {isLoggedIn ? (
                   <>
                     <Link to="/dashboard" className="flex-1">

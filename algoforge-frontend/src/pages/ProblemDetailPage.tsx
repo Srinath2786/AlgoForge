@@ -32,7 +32,9 @@ import { submissionService } from "@/lib/services/submissions";
 import { difficultyColor, cn } from "@/lib/utils";
 import { SubmissionResponse, TestCaseDto, TestCaseRequest } from "@/types/api";
 import { useAuthStore } from "@/store/auth-store";
-import { DAY_LABELS_FULL, getSchedule, getTodayIndex } from "@/lib/services/challenges";
+import { DAY_LABELS_FULL, getTodayIndex } from "@/lib/services/challenges";
+import { useWeekSchedule } from "@/components/challenges/useWeekSchedule";
+import { getSolvedProblemIdsLocal, getSubmissionSnapshot, saveSubmissionSnapshot } from "@/lib/submission-local";
 
 const LANGUAGES = [
   { id: "java", label: "Java", monaco: "java" },
@@ -208,22 +210,30 @@ export default function ProblemDetailPage() {
 
   function handleLanguageChange(next: string) {
     setLanguage(next);
-    setCode(TEMPLATES[next] ?? "");
-  }
-
-  useEffect(() => {
-    if (!isFullscreen) return;
-
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setIsFullscreen(false);
+    const nextTemplate = TEMPLATES[next] ?? "";
+    const localSnapshot = getSubmissionSnapshot(id);
+    if (localSnapshot && localSnapshot.language === next) {
+      setCode(localSnapshot.sourceCode || nextTemplate);
+      return;
     }
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [isFullscreen]);
+    setCode(nextTemplate);
+  }
 
   async function handleRunOrSubmit(action: "run" | "submit") {
     if (!id) return;
+
+    const draftPayload = {
+      problemId: Number(id),
+      status: action === "submit" ? "PENDING" : "RUNNING",
+      language,
+      sourceCode: code,
+      submittedAt: new Date().toISOString(),
+      executionTimeMs: null,
+      compilerOutput: null,
+      testCaseResults: [],
+    };
+
+    saveSubmissionSnapshot(draftPayload);
     setSubmitting(true);
     setLastAction(action);
     setResult(null);
@@ -238,6 +248,27 @@ export default function ProblemDetailPage() {
       setResult(res);
 
       if (action === "submit") {
+        const snapshot = {
+          problemId: Number(id),
+          submissionId: res.id ?? null,
+          status: res.status,
+          language,
+          sourceCode: code,
+          submittedAt: new Date().toISOString(),
+          executionTimeMs: res.executionTimeMs,
+          compilerOutput: res.compilerOutput,
+          testCaseResults: res.testCaseResults.map((tc) => ({
+            status: tc.status,
+            hidden: tc.hidden,
+            expectedOutput: tc.expectedOutput,
+            actualOutput: tc.actualOutput,
+            error: tc.error,
+            executionTimeMs: tc.executionTimeMs,
+          })),
+        };
+
+        saveSubmissionSnapshot(snapshot);
+
         if (res.status === "ACCEPTED") {
           queryClient.setQueryData<number[]>(["solved-problems"], (current) => {
             const next = new Set(current ?? []);
@@ -255,6 +286,10 @@ export default function ProblemDetailPage() {
         queryClient.invalidateQueries({ queryKey: ["dashboard", "activity"] });
       } else {
         toast.success("Run complete");
+        saveSubmissionSnapshot({
+          ...draftPayload,
+          status: "RUNNING",
+        });
       }
     } catch (err: unknown) {
       const message =
@@ -262,6 +297,18 @@ export default function ProblemDetailPage() {
           ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : undefined) ||
         "Couldn't reach the backend. Confirm it's running and Docker is available.";
+
+      saveSubmissionSnapshot({
+        problemId: Number(id),
+        status: "PENDING",
+        language,
+        sourceCode: code,
+        submittedAt: new Date().toISOString(),
+        executionTimeMs: null,
+        compilerOutput: message,
+        testCaseResults: [],
+      });
+
       toast.error(message);
     } finally {
       setSubmitting(false);
@@ -271,12 +318,71 @@ export default function ProblemDetailPage() {
   const problem = problemQuery.data;
   const testCases = testCasesQuery.data ?? [];
   const allTestCases = allTestCasesQuery.data ?? [];
-  const solvedProblemIds = new Set(solvedProblemsQuery.data ?? []);
+  const remoteSolvedIds = new Set(solvedProblemsQuery.data ?? []);
+  const localSolvedIds = new Set(getSolvedProblemIdsLocal());
+  const solvedProblemIds = new Set([...remoteSolvedIds, ...localSolvedIds]);
+  const localSnapshot = problem ? getSubmissionSnapshot(problem.id) : null;
   const isSolved = problem ? solvedProblemIds.has(problem.id) || result?.status === "ACCEPTED" : false;
+  const effectiveCode = localSnapshot?.sourceCode ?? code;
   const meta = result ? statusMeta(result.status) : null;
+
+  useEffect(() => {
+    if (!problem) return;
+
+    const snapshot = getSubmissionSnapshot(problem.id);
+    if (snapshot) {
+      setLanguage(snapshot.language || "java");
+      setCode(snapshot.sourceCode || TEMPLATES[snapshot.language || "java"] || "");
+
+      const savedStatus = snapshot.status as SubmissionResponse["status"] | undefined;
+      const isPersistedResult =
+        savedStatus === "ACCEPTED" ||
+        savedStatus === "WRONG_ANSWER" ||
+        savedStatus === "TIME_LIMIT_EXCEEDED" ||
+        savedStatus === "MEMORY_LIMIT_EXCEEDED" ||
+        savedStatus === "RUNTIME_ERROR" ||
+        savedStatus === "COMPILATION_ERROR" ||
+        savedStatus === "PENDING" ||
+        savedStatus === "RUNNING";
+
+      if (isPersistedResult) {
+        setResult((prev) => prev ?? {
+          id: snapshot.submissionId ?? null,
+          problemId: problem.id,
+          language: snapshot.language,
+          status: savedStatus ?? "PENDING",
+          executionTimeMs: snapshot.executionTimeMs ?? null,
+          memoryUsedKb: null,
+          compilerOutput: snapshot.compilerOutput ?? null,
+          testCaseResults: (snapshot.testCaseResults ?? []).map((tc, idx) => ({
+            testCaseId: idx + 1,
+            hidden: Boolean(tc.hidden),
+            status: String(tc.status),
+            expectedOutput: tc.expectedOutput ?? null,
+            actualOutput: tc.actualOutput ?? null,
+            error: tc.error ?? null,
+            executionTimeMs: tc.executionTimeMs ?? null,
+          })),
+          submittedAt: snapshot.submittedAt,
+        });
+      }
+    }
+  }, [problem]);
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setIsFullscreen(false);
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isFullscreen]);
   const todayIndex = getTodayIndex();
+  const { schedule } = useWeekSchedule();
   const challengeDay = problem
-    ? Object.entries(getSchedule()).find(([, pid]) => pid === problem.id)?.[0]
+    ? Object.entries(schedule).find(([, pid]) => pid === problem.id)?.[0]
     : undefined;
   const challengeDayNum = challengeDay != null ? Number(challengeDay) : null;
 
@@ -303,11 +409,14 @@ export default function ProblemDetailPage() {
   return (
     <DashboardShell>
       <div className={cn(
-        "grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1.25fr]",
+        "grid grid-cols-1 gap-6 xl:h-[calc(100vh-8rem)] xl:grid-cols-[1.02fr_1.28fr] xl:overflow-hidden",
         isFullscreen && "fixed inset-0 z-50 min-h-0 overflow-hidden bg-void p-4"
       )}>
-        <div className={cn("space-y-6", isFullscreen && "min-h-0 overflow-y-auto pr-1")}>
-          <Card className="p-6">
+        <div className={cn(
+          "space-y-5 xl:min-h-0 xl:overflow-y-auto xl:pr-2",
+          isFullscreen && "min-h-0 overflow-y-auto pr-1"
+        )}>
+          <Card className="overflow-hidden border border-hairline bg-[radial-gradient(circle_at_top,_rgba(255,122,61,0.10),_transparent_32%),_rgba(11,15,22,0.98)] p-5 shadow-[0_18px_44px_rgba(2,6,23,0.42)] sm:p-6">
             <div className="flex flex-wrap items-center gap-2">
               <Badge className={difficultyColor(problem.difficulty)}>{problem.difficulty}</Badge>
               {isSolved && (
@@ -331,61 +440,68 @@ export default function ProblemDetailPage() {
                 ))}
             </div>
 
-            <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight">
+            <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight text-ink">
               {problem.title}
             </h1>
 
-            <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink-muted">
+            <p className="mt-4 whitespace-pre-line text-sm leading-7 text-ink-muted">
               {problem.description}
             </p>
           </Card>
 
-          <Card className="p-6">
-            <p className="mb-3 font-mono text-[11px] uppercase tracking-widest text-ink-faint">
-              Examples
-            </p>
+          <Card className="overflow-hidden border border-hairline bg-surface/80 p-5 sm:p-6">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-faint">
+                Examples
+              </p>
+              <span className="rounded-full border border-hairline bg-elevated/60 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-ink-faint">
+                {problem.examples ? "Sample output" : "No sample"}
+              </span>
+            </div>
             {problem.examples ? (
-              <pre className="whitespace-pre-wrap rounded-xl border border-hairline bg-surface p-4 font-mono text-xs text-ink-muted">
+              <pre className="whitespace-pre-wrap rounded-2xl border border-hairline bg-void/80 p-4 font-mono text-xs leading-6 text-ink-muted shadow-inner shadow-black/10">
                 {problem.examples}
               </pre>
             ) : (
               <p className="text-xs text-ink-faint">No examples were provided for this problem.</p>
             )}
 
-            <p className="mb-3 mt-6 font-mono text-[11px] uppercase tracking-widest text-ink-faint">
-              Constraints
-            </p>
-            {problem.constraints ? (
-              <pre className="whitespace-pre-wrap rounded-xl border border-hairline bg-surface p-4 font-mono text-xs text-ink-muted">
-                {problem.constraints}
-              </pre>
-            ) : (
-              <p className="text-xs text-ink-faint">No constraints were provided.</p>
-            )}
+            <div className="mt-6">
+              <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-faint">
+                Constraints
+              </p>
+              {problem.constraints ? (
+                <pre className="whitespace-pre-wrap rounded-2xl border border-hairline bg-void/80 p-4 font-mono text-xs leading-6 text-ink-muted shadow-inner shadow-black/10">
+                  {problem.constraints}
+                </pre>
+              ) : (
+                <p className="text-xs text-ink-faint">No constraints were provided.</p>
+              )}
+            </div>
           </Card>
 
-          <Card className="p-6">
-            <p className="mb-3 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-ink-faint">
+          <Card className="overflow-hidden border border-hairline bg-surface/80 p-5 sm:p-6">
+            <p className="mb-4 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-faint">
               <ListChecks size={12} /> Sample Test Cases ({testCases.length})
             </p>
 
             <div className="space-y-3">
               {testCases.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-hairline bg-surface/60 p-4 text-sm text-ink-muted">
+                <div className="rounded-2xl border border-dashed border-hairline bg-surface/60 p-4 text-sm text-ink-muted">
                   This problem currently has no visible sample test cases.
                   Hidden judge cases can still exist behind the scenes when you submit.
                 </div>
               ) : (
                 testCases.slice(0, 3).map((tc, i) => (
-                  <div key={tc.id ?? i} className="rounded-xl border border-hairline bg-surface p-4 font-mono text-xs">
-                    <div className="mb-2 flex items-center gap-2 text-[11px] uppercase tracking-widest text-ink-faint">
+                  <div key={tc.id ?? i} className="rounded-2xl border border-hairline bg-void/80 p-4 font-mono text-xs shadow-inner shadow-black/10">
+                    <div className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-ink-faint">
                       <BadgeCheck size={12} className="text-cyan" />
                       Sample {i + 1}
                     </div>
                     <p className="text-ink-faint">Input</p>
-                    <p className="whitespace-pre-wrap text-ink">{tc.input}</p>
+                    <p className="mt-1 whitespace-pre-wrap rounded-lg border border-hairline bg-surface/60 p-3 text-ink">{tc.input}</p>
                     <p className="mt-3 text-ink-faint">Expected Output</p>
-                    <p className="whitespace-pre-wrap text-ink">{tc.expectedOutput}</p>
+                    <p className="mt-1 whitespace-pre-wrap rounded-lg border border-hairline bg-surface/60 p-3 text-ink">{tc.expectedOutput}</p>
                   </div>
                 ))
               )}
@@ -525,17 +641,17 @@ export default function ProblemDetailPage() {
         </div>
 
         <Card className={cn(
-          "overflow-hidden border border-hairline bg-void",
+          "overflow-hidden border border-hairline bg-[radial-gradient(circle_at_top,_rgba(69,217,199,0.06),_transparent_30%),_rgba(11,15,22,0.98)] xl:flex xl:min-h-0 xl:h-full xl:flex-col",
           isFullscreen && "flex min-h-0 h-full flex-col"
         )}>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-5 py-3">
-            <div className="flex gap-1.5 rounded-lg border border-hairline bg-surface p-1">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline bg-surface/60 px-5 py-3">
+            <div className="flex gap-1.5 rounded-xl border border-hairline bg-surface p-1">
               {LANGUAGES.map((l) => (
                 <button
                   key={l.id}
                   onClick={() => handleLanguageChange(l.id)}
                   className={cn(
-                    "rounded-md px-3 py-1.5 font-mono text-xs transition-colors",
+                    "rounded-lg px-3 py-1.5 font-mono text-xs transition-colors",
                     language === l.id ? "bg-forge/15 text-forge" : "text-ink-faint hover:text-ink"
                   )}
                 >
@@ -557,7 +673,13 @@ export default function ProblemDetailPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleRunOrSubmit("run")}
+                onClick={() => {
+                  const currentSnapshot = getSubmissionSnapshot(id);
+                  if (currentSnapshot) {
+                    saveSubmissionSnapshot({ ...currentSnapshot, sourceCode: code, language });
+                  }
+                  handleRunOrSubmit("run");
+                }}
                 disabled={submitting}
               >
                 {submitting && lastAction === "run" ? (
@@ -570,7 +692,13 @@ export default function ProblemDetailPage() {
               <Button
                 variant="forge"
                 size="sm"
-                onClick={() => handleRunOrSubmit("submit")}
+                onClick={() => {
+                  const currentSnapshot = getSubmissionSnapshot(id);
+                  if (currentSnapshot) {
+                    saveSubmissionSnapshot({ ...currentSnapshot, sourceCode: code, language });
+                  }
+                  handleRunOrSubmit("submit");
+                }}
                 disabled={submitting}
               >
                 {submitting && lastAction === "submit" ? (
@@ -583,12 +711,19 @@ export default function ProblemDetailPage() {
             </div>
           </div>
 
-          <div className={isFullscreen ? "min-h-0 flex-1" : "h-[460px]"}>
+          <div className={isFullscreen ? "min-h-0 flex-1" : "h-[460px] xl:h-[min(58%,460px)] xl:shrink-0"}>
             <MonacoEditor
               language={LANGUAGES.find((l) => l.id === language)?.monaco}
               theme="vs-dark"
-              value={code}
-              onChange={(v) => setCode(v ?? "")}
+              value={effectiveCode}
+              onChange={(v) => {
+                const nextValue = v ?? "";
+                setCode(nextValue);
+                const snapshot = getSubmissionSnapshot(id);
+                if (snapshot) {
+                  saveSubmissionSnapshot({ ...snapshot, sourceCode: nextValue, language });
+                }
+              }}
               options={{
                 fontSize: 13,
                 minimap: { enabled: false },
@@ -600,12 +735,20 @@ export default function ProblemDetailPage() {
           </div>
 
           <div className={cn(
-            "border-t border-hairline bg-elevated/40 p-5",
+            "border-t border-hairline bg-surface/70 p-5",
+            "xl:min-h-0 xl:flex-1 xl:overflow-auto",
             isFullscreen && "min-h-0 flex-1 overflow-auto"
           )}>
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-widest text-ink-faint">
-              Console
-            </p>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-faint">
+                Console
+              </p>
+              {result && !submitting && meta && (
+                <span className={cn("inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]", meta.color === "text-cyan" ? "border-cyan/25 bg-cyan/10 text-cyan" : meta.color === "text-amber" ? "border-amber/25 bg-amber/10 text-amber" : "border-danger/25 bg-danger/10 text-danger")}>
+                  {result.status.replace(/_/g, " ")}
+                </span>
+              )}
+            </div>
 
             {!result && !submitting && (
               <p className="font-mono text-xs text-ink-faint">

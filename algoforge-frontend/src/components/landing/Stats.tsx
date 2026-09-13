@@ -41,7 +41,7 @@ export function Stats() {
     <section className="section-shell relative border-y border-hairline-soft bg-void py-20">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="mb-10 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-ink-faint">
+          <p className="text-[10px] font-medium tracking-[0.18em] text-ink-faint">
             Momentum by the numbers
           </p>
         </div>

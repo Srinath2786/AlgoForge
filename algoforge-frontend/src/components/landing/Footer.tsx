@@ -41,11 +41,11 @@ const COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-hairline bg-void">
+    <footer className="relative border-t border-hairline bg-void/80">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-6">
           <div className="col-span-2">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-white/6 bg-white/[0.02] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-forge/30 bg-forge/15">
                 <Flame className="text-forge" size={18} strokeWidth={2.4} />
               </span>

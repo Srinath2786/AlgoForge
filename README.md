@@ -69,6 +69,7 @@ Set environment variables:
 ```powershell
 $env:DB_PASSWORD = "postgres"
 $env:JWT_SECRET = "change-this-to-a-real-256-bit-secret"
+$env:SPRING_PROFILES_ACTIVE = "demo" # local demo data and demo admin only
 ```
 
 Run the backend:
@@ -125,6 +126,38 @@ Frontend URL:
 - Dashboard: `/api/dashboard`
 - User endpoints: `/api/users`, `/api/admin/users`
 
+## REST API reference
+
+Interactive documentation: `http://localhost:8080/swagger-ui.html`  
+OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+The table below reflects endpoints implemented in this repository. An authenticated request uses `Authorization: Bearer <JWT>`.
+
+| Area | Method | Endpoint | Access | Purpose |
+| --- | --- | --- | --- | --- |
+| Auth | POST | `/api/auth/register` | Public | Register an account |
+| Auth | POST | `/api/auth/login` | Public | Log in and receive a JWT |
+| Problems | GET | `/api/problems?search=&difficulty=&page=&size=` | Public | Browse and filter problems |
+| Problems | GET | `/api/problems/{id}` | Public | Read a problem and its visible test cases |
+| Problems | POST/PUT/DELETE | `/api/problems`, `/api/problems/{id}` | Admin | Manage problems |
+| Test cases | GET | `/api/problems/{id}/testcases` | Public | Read visible test cases |
+| Test cases | GET/POST/PUT/DELETE | `/api/problems/{id}/testcases/all`, `/api/problems/{id}/testcases...` | Admin | Manage all test cases, including hidden ones |
+| Submissions | POST | `/api/submissions` | Authenticated | Run (`sampleRunOnly: true`) or submit (`false`) source code |
+| Submissions | GET | `/api/submissions/me`, `/api/submissions/{id}`, `/api/submissions/{id}/results` | Authenticated | Read personal submission history and verdict details |
+| Submissions | GET | `/api/submissions/me/solved-problems` | Authenticated | Read solved problem IDs |
+| Hints | GET | `/api/problems/{id}/hints`, `/api/problems/{id}/editorial` | Authenticated | Read hints and conditionally unlocked editorial |
+| Users | GET | `/api/users/me`, `/api/users/me/dashboard` | Authenticated | Read current profile and dashboard statistics |
+| Users | PUT | `/api/users/me/profile` | Authenticated | Update current profile |
+| Leaderboard | GET | `/api/leaderboard` | Public | Read rankings |
+| Dashboard | GET | `/api/dashboard`, `/api/dashboard/activity` | Authenticated | Read dashboard summary and activity |
+| Challenges | GET | `/api/challenges/weekly` | Authenticated | Read the shared weekly challenge schedule |
+| Challenges | PUT/DELETE | `/api/challenges/weekly/{dayOfWeek}` | Admin | Assign or clear a weekday challenge |
+| Admin users | GET | `/api/admin/users` | Admin | Read platform user accounts |
+
+### Planned API groups
+
+`/api/intelligence`, `/api/notes`, `/api/bookmarks`, `/api/admin/metrics`, and `/api/admin/audit-logs` are product roadmap items, not implemented endpoints. They should not be advertised in public API documentation until their data model, authorization rules, and tests are implemented.
+
 ## Notes
 
 - The backend reads the database URL from `application.yml`, which defaults to PostgreSQL on `localhost:5432` with database `coding_platform`.
@@ -140,6 +173,7 @@ cd coding-platform-backend
 docker compose up -d postgres
 $env:DB_PASSWORD = "postgres"
 $env:JWT_SECRET = "change-this-to-a-real-256-bit-secret"
+$env:SPRING_PROFILES_ACTIVE = "demo"
 mvn spring-boot:run
 
 # Terminal 2: frontend

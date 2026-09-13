@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CalendarDays, ShieldAlert, X } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { problemService } from "@/lib/services/problems";
 import { useWeekSchedule } from "@/components/challenges/useWeekSchedule";
-import { DAY_LABELS_FULL, getDateForDay, setDayProblem } from "@/lib/services/challenges";
+import { challengeService, DAY_LABELS_FULL, getDateForDay } from "@/lib/services/challenges";
 import { difficultyColor } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -17,6 +17,7 @@ export default function AdminChallengesPage() {
   const { role, hydrated } = useAuthStore();
   const isAdmin = role === "ADMIN";
   const { schedule, byId } = useWeekSchedule();
+  const queryClient = useQueryClient();
 
   const catalogQuery = useQuery({
     queryKey: ["problems-catalog-full"],
@@ -42,10 +43,18 @@ export default function AdminChallengesPage() {
 
   const problems = catalogQuery.data?.content ?? [];
 
+  const scheduleMutation = useMutation({
+    mutationFn: ({ day, problemId }: { day: number; problemId: number | null }) =>
+      problemId === null ? challengeService.clear(day) : challengeService.assign(day, problemId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["weekly-challenge-schedule"] }),
+    onError: () => toast.error("Could not save the challenge schedule."),
+  });
+
   function handleAssign(day: number, value: string) {
     const problemId = value === "" ? null : Number(value);
-    setDayProblem(day, problemId);
-    toast.success(problemId ? "Challenge pinned" : "Day cleared");
+    scheduleMutation.mutate({ day, problemId }, {
+      onSuccess: () => toast.success(problemId ? "Challenge pinned" : "Day cleared"),
+    });
   }
 
   return (
@@ -56,7 +65,7 @@ export default function AdminChallengesPage() {
         <p className="mt-1 max-w-2xl text-sm text-ink-muted">
           Pin one problem from your catalog to each day of the week, Sunday through Saturday. The pick shows up as
           the daily challenge on Problems, the Challenges calendar, and each user&apos;s dashboard. This schedule is
-          stored in your browser — reassign it here any time.
+          stored securely in AlgoForge and shared with every learner.
         </p>
       </div>
 
@@ -86,6 +95,7 @@ export default function AdminChallengesPage() {
                   <select
                     value={assignedId ?? ""}
                     onChange={(e) => handleAssign(day, e.target.value)}
+                    disabled={scheduleMutation.isPending}
                     className="w-full max-w-sm rounded-lg border border-hairline bg-surface px-3 py-2 text-sm text-ink focus:border-forge/60 focus:outline-none"
                   >
                     <option value="">— Unassigned —</option>

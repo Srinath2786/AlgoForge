@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Camera,
@@ -22,7 +22,7 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/auth-store";
-import { authService } from "@/lib/services/auth";
+import { authService, generateAutoProfile } from "@/lib/services/auth";
 import type { UserProfile } from "@/types/api";
 
 interface ProfileFormState {
@@ -47,19 +47,23 @@ const emptyProfile: ProfileFormState = {
   location: "",
 };
 
-const buildProfileForm = (profile: Partial<UserProfile> | undefined, username: string | null): ProfileFormState => ({
-  fullName: profile?.fullName ?? profile?.username ?? username ?? "User",
-  email: profile?.email ?? "",
-  bio: profile?.bio ?? "I solve tough problems, build polished products, and keep shipping better every day.",
-  avatarUrl: profile?.avatarUrl ?? "",
-  website: profile?.website ?? "",
-  linkedIn: profile?.linkedIn ?? "",
-  github: profile?.github ?? "",
-  location: profile?.location ?? "",
-});
+const buildProfileForm = (profile: Partial<UserProfile> | undefined, username: string | null): ProfileFormState => {
+  const generated = generateAutoProfile(username || profile?.username || "algoforge-user", profile?.role || "USER");
+  return {
+    fullName: profile?.fullName ?? generated.fullName ?? username ?? "User",
+    email: profile?.email ?? generated.email ?? "",
+    bio: profile?.bio ?? generated.bio ?? "I solve tough problems, build polished products, and keep shipping better every day.",
+    avatarUrl: profile?.avatarUrl ?? generated.avatarUrl ?? "",
+    website: profile?.website ?? generated.website ?? "",
+    linkedIn: profile?.linkedIn ?? generated.linkedIn ?? "",
+    github: profile?.github ?? generated.github ?? "",
+    location: profile?.location ?? generated.location ?? "",
+  };
+};
 
 export default function SettingsPage() {
   const { username } = useAuthStore();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<ProfileFormState>(emptyProfile);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -88,6 +92,25 @@ export default function SettingsPage() {
   const handleFieldChange = (field: keyof ProfileFormState, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
     setSaved(false);
+  };
+
+  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) {
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === "string" ? reader.result : "";
+      if (dataUrl) {
+        setForm((current) => ({ ...current, avatarUrl: dataUrl }));
+        setSaved(false);
+      }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
   };
 
   const handleSave = async () => {
@@ -153,6 +176,13 @@ export default function SettingsPage() {
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
                   {hasAvatar ? (
                     <img
                       src={form.avatarUrl}
@@ -164,9 +194,14 @@ export default function SettingsPage() {
                       {initials}
                     </div>
                   )}
-                  <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border border-surface bg-surface text-forge shadow-lg">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border border-surface bg-surface text-forge shadow-lg transition hover:scale-105 hover:border-forge/25"
+                    aria-label="Upload profile photo"
+                  >
                     <Camera size={13} />
-                  </div>
+                  </button>
                 </div>
                 <div>
                   <p className="font-display text-2xl font-semibold">{form.fullName || username || "Your name"}</p>
@@ -196,9 +231,18 @@ export default function SettingsPage() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
-                  <Camera size={13} /> Avatar URL
-                </label>
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+                    <Camera size={13} /> Avatar URL
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-[11px] font-medium text-forge transition hover:text-forge/80"
+                  >
+                    Upload photo
+                  </button>
+                </div>
                 <Input
                   value={form.avatarUrl}
                   onChange={(event) => handleFieldChange("avatarUrl", event.target.value)}

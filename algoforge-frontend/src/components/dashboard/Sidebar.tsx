@@ -1,10 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { CalendarDays, Code2, Flame, History, LayoutDashboard, ListChecks, LogOut, Settings, ShieldCheck, Trophy, UserRound, Zap } from "lucide-react";
+import { CalendarDays, Code2, Flame, History, LayoutDashboard, ListChecks, LogOut, Settings, ShieldCheck, SunMedium, Trophy, UserRound, Zap, MoonStar } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
+import { useThemeStore } from "@/store/theme-store";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/profile", label: "Profile", icon: UserRound },
   { href: "/problems", label: "Problems", icon: Code2 },
   { href: "/challenges", label: "Challenges", icon: CalendarDays },
   { href: "/submissions", label: "Submissions", icon: History },
@@ -22,6 +24,7 @@ export function Sidebar() {
   const pathname = useLocation().pathname;
   const navigate = useNavigate();
   const { username, role, logout } = useAuthStore();
+  const { mode, toggleTheme } = useThemeStore();
   const isAdmin = role === "ADMIN";
   const initials = username?.slice(0, 2).toUpperCase() || "AF";
 
@@ -31,12 +34,12 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[268px] flex-col border-r border-hairline bg-surface lg:flex">
-      <div className="border-b border-hairline px-5 py-5">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[268px] flex-col border-r border-hairline bg-[linear-gradient(180deg,rgba(13,18,32,0.96),rgba(10,14,22,0.98))] shadow-[20px_0_70px_rgba(7,11,18,0.34)] backdrop-blur-xl lg:flex">
+      <div className="border-b border-hairline/80 px-5 py-5">
         <Link to="/dashboard" className="group flex items-center gap-3">
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-forge/30 bg-forge/10 text-forge transition-transform group-hover:scale-105">
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-xl border border-forge/30 bg-gradient-to-br from-forge/20 via-forge/10 to-cyan/10 text-forge shadow-[0_0_24px_rgba(255,122,61,0.15)] transition-transform group-hover:scale-105">
             <Flame size={18} strokeWidth={2.5} />
-            <span className="absolute inset-0 rounded-xl shadow-[0_0_24px_rgba(255,122,61,0.14)]" />
+            <span className="absolute inset-0 rounded-xl ring-1 ring-forge/15" />
           </span>
           <div>
             <p className="font-display text-[15px] font-semibold tracking-tight">Algo<span className="text-forge">Forge</span></p>
@@ -96,7 +99,7 @@ export function Sidebar() {
         </div>
       )}
 
-      <div className="mx-4 mt-6 rounded-2xl border border-forge/15 bg-gradient-to-br from-forge/10 to-transparent p-4">
+      <div className="mx-4 mt-6 rounded-2xl border border-forge/15 bg-gradient-to-br from-forge/12 via-forge/6 to-cyan/6 p-4 brand-sheen brand-glow">
         <div className="flex items-center gap-2 text-xs font-semibold"><Zap size={14} className="text-forge" /> Daily practice</div>
         <p className="mt-1.5 text-[11px] leading-5 text-ink-faint">One problem today keeps your momentum moving.</p>
         <Link to="/problems" className="mt-3 inline-flex text-[11px] font-semibold text-forge hover:text-forge-hot">Find a problem →</Link>
@@ -107,8 +110,20 @@ export function Sidebar() {
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-forge/20 bg-forge/10 text-[11px] font-bold text-forge">{initials}</div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{username || "AlgoForge user"}</p>
-            <Link to="/settings" className="mt-0.5 flex items-center gap-1 text-[10px] text-ink-faint hover:text-ink-muted"><UserRound size={10} /> Account settings</Link>
+            <div className="mt-1 flex items-center gap-2">
+              <Link to="/profile" className="flex items-center gap-1 text-[10px] text-ink-faint hover:text-ink-muted"><UserRound size={10} /> Profile</Link>
+              <span className="text-[10px] text-ink-faint">·</span>
+              <Link to="/settings" className="flex items-center gap-1 text-[10px] text-ink-faint hover:text-ink-muted">Settings</Link>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-hairline bg-surface text-ink-muted transition hover:text-ink"
+            aria-label="Toggle theme"
+          >
+            {mode === "dark" ? <SunMedium size={15} /> : <MoonStar size={15} />}
+          </button>
           <button
             onClick={handleLogout}
             className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-semibold text-ink-faint transition-colors hover:bg-danger/10 hover:text-danger"
