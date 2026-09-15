@@ -85,7 +85,7 @@ docker compose up -d postgres
 
 ```powershell
 cd coding-platform-backend
-$env:DB_PASSWORD = "postgres"
+$env:DB_PASSWORD = "1234"
 $env:JWT_SECRET = "replace-this-with-a-long-random-secret"
 $env:SPRING_PROFILES_ACTIVE = "demo"  # local demo problems/admin only
 mvn spring-boot:run
@@ -126,12 +126,13 @@ Authorization: Bearer <JWT_TOKEN>
 | Problem administration | `POST/PUT/DELETE /api/problems` | Admin |
 | Test cases | `GET /api/problems/{id}/testcases` | Public, visible cases only |
 | Test-case administration | `GET /all`, `POST`, `PUT`, `DELETE /api/problems/{id}/testcases...` | Admin only |
-| Submissions | `POST /api/submissions`, `GET /api/submissions/me`, `GET /api/submissions/{id}` | Authenticated |
+| Submissions | `POST /api/submissions`, `GET /api/submissions/me`, `GET /api/submissions/{id}`, `GET /api/submissions/{id}/results`, `GET /api/submissions/me/solved-problems` | Authenticated |
 | Hints/editorial | `GET /api/problems/{id}/hints`, `/editorial` | Authenticated |
 | Dashboard | `GET /api/dashboard`, `/api/dashboard/activity` | Authenticated |
 | Challenges | `GET /api/challenges/weekly` | Authenticated |
 | Challenge administration | `PUT/DELETE /api/challenges/weekly/{dayOfWeek}` | Admin |
-| Users | `GET /api/users/me`, `PUT /api/users/me/profile` | Authenticated |
+| Users | `GET /api/users/me`, `GET /api/users/me/dashboard`, `PUT /api/users/me/profile` | Authenticated |
+| User administration | `GET /api/admin/users` | Admin |
 | Leaderboard | `GET /api/leaderboard` | Public |
 
 `POST /api/submissions` supports both actions: use `sampleRunOnly: true` for a sample run or `false` for an official submission.
@@ -157,6 +158,48 @@ cd coding-platform-backend
 mvn test
 mvn package
 ```
+
+The backend test profile uses an in-memory H2 database and disables Flyway and Docker execution:
+
+```powershell
+mvn test -Dspring.profiles.active=test
+```
+
+## Database and Flyway workflow
+
+The backend applies SQL migrations from `coding-platform-backend/src/main/resources/db/migration/` during startup. Migration files use `V<version>__<description>.sql`; Flyway records completed migrations in the `flyway_schema_history` table.
+
+To change the schema, add a new next-numbered, forward-only migration and commit it with its matching Java changes. Do not edit a migration that may already have been applied by another environment.
+
+For an intentionally fresh local database only:
+
+```powershell
+cd coding-platform-backend
+docker compose down -v
+docker compose up -d postgres
+```
+
+`docker compose down -v` deletes the local PostgreSQL volume, so do not use it when the database contains data you need.
+
+## Configuration reference
+
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | `http://localhost:8080` | Frontend API address; restart Vite after changing `.env`. |
+| `DB_PASSWORD` | `1234` | Must match the PostgreSQL Compose password. |
+| `JWT_SECRET` | development fallback | Always set a long, unique value outside local development. |
+| `DOCKER_EXECUTION_ENABLED` | `true` | Set `false` to start the API without the code runner. |
+| `APP_CORS_ALLOWED_ORIGINS` | local Vite origins | Comma-separated allowed browser origins. |
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Backend cannot connect to PostgreSQL | Run `docker compose ps`; confirm PostgreSQL is healthy and `DB_PASSWORD` is `1234` (or matches your override). |
+| Frontend cannot call the API | Check that the API is running on port 8080 and `VITE_API_BASE_URL` is correct. |
+| Browser shows a CORS error | Add the browser origin/port to `APP_CORS_ALLOWED_ORIGINS`. |
+| A submission does not run | Start Docker Desktop and confirm `DOCKER_EXECUTION_ENABLED` is not `false`. |
+| Flyway reports a local migration failure | Inspect backend logs and `flyway_schema_history`; recreate the database volume only if data loss is acceptable. |
 
 ## Git workflow
 
