@@ -11,6 +11,7 @@
 | Quick links | |
 | --- | --- |
 | Project report | [Download the Infosys Springboard internship report](docs/InfosysSpringboardInternshipReport.docx) |
+| Screenshots | [Browse the project screenshots](docs/screenshots/) |
 | Frontend | [`algoforge-frontend/`](algoforge-frontend/) |
 | Backend API | [`coding-platform-backend/`](coding-platform-backend/) |
 
@@ -48,7 +49,7 @@ PostgreSQL + Flyway   Docker execution sandbox
 AlgoForge/
 ├── algoforge-frontend/        # React + TypeScript user interface
 ├── coding-platform-backend/   # Spring Boot REST API and execution service
-├── docs/                      # Project documentation and internship report
+├── docs/                      # Project documentation, report, and screenshots
 ├── README.md                  # Setup, architecture, API, and operations guide
 └── .gitignore                 # Local build, secret, and runtime exclusions
 ```
