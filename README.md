@@ -1,6 +1,20 @@
 # AlgoForge
 
-AlgoForge is a full-stack coding-practice platform where developers can solve algorithm problems, run code in an isolated environment, submit against hidden test cases, track progress, and compete on a leaderboard.
+> A full-stack coding-practice platform for solving algorithm problems, receiving secure code-execution results, tracking progress, and competing on a leaderboard.
+
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-6DB33F?logo=springboot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Sandboxed%20execution-2496ED?logo=docker&logoColor=white)
+
+| Quick links | |
+| --- | --- |
+| Project report | [Download the Infosys Springboard internship report](docs/InfosysSpringboardInternshipReport.docx) |
+| Frontend | [`algoforge-frontend/`](algoforge-frontend/) |
+| Backend API | [`coding-platform-backend/`](coding-platform-backend/) |
+
+> GitHub does not preview this Word file because of its size. Open the report link above and choose **Download raw** to view it locally.
 
 It is built as a modular React + Spring Boot application with PostgreSQL, Flyway schema migrations, JWT authentication, and Docker-based code execution.
 
@@ -26,6 +40,17 @@ Spring Boot REST API (localhost:8080)
         |                 |
         v                 v
 PostgreSQL + Flyway   Docker execution sandbox
+```
+
+## Repository layout
+
+```text
+AlgoForge/
+├── algoforge-frontend/        # React + TypeScript user interface
+├── coding-platform-backend/   # Spring Boot REST API and execution service
+├── docs/                      # Project documentation and internship report
+├── README.md                  # Setup, architecture, API, and operations guide
+└── .gitignore                 # Local build, secret, and runtime exclusions
 ```
 
 ### Frontend
