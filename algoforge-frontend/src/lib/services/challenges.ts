@@ -16,8 +16,8 @@ export const challengeService = {
     .then((response) => response.data.data),
   assign: (day: number, problemId: number) => api.put<WeeklyChallengeResponse>(
     `/api/challenges/weekly/${day}`, { problemId }
-  ).then((response) => response.data),
-  clear: (day: number) => api.delete(`/api/challenges/weekly/${day}`),
+  ).then(() => undefined),
+  clear: (day: number) => api.delete(`/api/challenges/weekly/${day}`).then(() => undefined),
 };
 
 export function getTodayIndex() { return new Date().getDay(); }

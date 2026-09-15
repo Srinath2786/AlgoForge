@@ -8,6 +8,57 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Sandboxed%20execution-2496ED?logo=docker&logoColor=white)
 
+AlgoForge brings the core coding-platform workflow into one place: discover a problem, write and run code in the browser, submit against hidden tests, and review your progress over time.
+
+![AlgoForge problem workspace](docs/screenshots/screenshot-01.png)
+
+## Quick start
+
+The fastest local setup is:
+
+```powershell
+# Terminal 1: database
+cd coding-platform-backend
+docker compose up -d postgres
+
+# Terminal 2: API
+cd coding-platform-backend
+$env:DB_PASSWORD = "1234"
+$env:JWT_SECRET = "replace-this-with-a-long-random-secret"
+$env:SPRING_PROFILES_ACTIVE = "demo"
+mvn spring-boot:run
+
+# Terminal 3: web app
+cd algoforge-frontend
+npm install
+Copy-Item .env.example .env -ErrorAction SilentlyContinue
+npm run dev
+```
+
+Open `http://localhost:5173`. The API is available at `http://localhost:8080`.
+
+When the `demo` profile is enabled, use the seeded admin account for local exploration:
+
+| Username | Password |
+| --- | --- |
+| `admin` | `Admin@123` |
+
+These credentials are for local demo use only. Do not use them in a deployed environment.
+
+## Contents
+
+- [What AlgoForge provides](#highlights)
+- [Architecture](#system-architecture)
+- [Repository layout](#repository-layout)
+- [Technology stack](#technology-stack)
+- [Run locally](#run-locally)
+- [REST API](#rest-api)
+- [Security model](#security-model)
+- [Testing and build](#testing-and-build)
+- [Configuration reference](#configuration-reference)
+- [Troubleshooting](#troubleshooting)
+- [Roadmap](#roadmap)
+
 | Quick links | |
 | --- | --- |
 | Project report | [Download the Infosys Springboard internship report](docs/InfosysSpringboardInternshipReport.docx) |
@@ -17,7 +68,7 @@
 
 > GitHub does not preview this Word file because of its size. Open the report link above and choose **Download raw** to view it locally.
 
-It is built as a modular React + Spring Boot application with PostgreSQL, Flyway schema migrations, JWT authentication, and Docker-based code execution.
+The platform is built as a modular React + Spring Boot application with PostgreSQL, Flyway schema migrations, JWT authentication, and Docker-based code execution.
 
 ## Highlights
 
@@ -30,12 +81,24 @@ It is built as a modular React + Spring Boot application with PostgreSQL, Flyway
 - Dashboard, activity graph, profile, submissions, and leaderboard
 - Responsive workspace with independently scrollable problem and editor panels on desktop
 
+## Screenshots
+
+The interface is organized around repeated practice: choose a problem, work in the editor, inspect results, and follow progress from the dashboard.
+
+<p>
+        <img src="docs/screenshots/screenshot-02.png" alt="AlgoForge dashboard" width="32%" />
+        <img src="docs/screenshots/screenshot-03.png" alt="AlgoForge coding workspace" width="32%" />
+        <img src="docs/screenshots/screenshot-04.png" alt="AlgoForge leaderboard" width="32%" />
+</p>
+
+See the complete [screenshot collection](docs/screenshots/) for additional screens.
+
 ## System architecture
 
 ```text
 React + Vite frontend (localhost:5173)
         |
-        | HTTPS / REST + JWT
+        | HTTP / REST + JWT (local development)
         v
 Spring Boot REST API (localhost:8080)
         |                 |
@@ -134,6 +197,17 @@ Open `http://localhost:5173`.
 
 Set `VITE_API_BASE_URL=http://localhost:8080` in `algoforge-frontend/.env` when needed.
 
+### Optional: run the complete stack with Docker Compose
+
+The backend Compose service also builds and runs the API. It mounts the host Docker socket so submitted programs can launch isolated execution containers:
+
+```powershell
+cd coding-platform-backend
+docker compose up --build
+```
+
+Use this option when Docker Desktop is available and you want the API and database managed together. The frontend still runs separately with `npm run dev`.
+
 ## REST API
 
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
@@ -185,11 +259,14 @@ mvn test
 mvn package
 ```
 
-The backend test profile uses an in-memory H2 database and disables Flyway and Docker execution:
+Run the backend tests without Docker execution:
 
 ```powershell
-mvn test -Dspring.profiles.active=test
+cd coding-platform-backend
+mvn test "-Dspring.profiles.active=test"
 ```
+
+The backend test profile uses an in-memory H2 database and disables Flyway and Docker execution:
 
 ## Database and Flyway workflow
 
