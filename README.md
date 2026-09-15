@@ -45,7 +45,7 @@ When the `demo` profile is enabled, use the seeded admin account for local explo
 
 These credentials are for local demo use only. Do not use them in a deployed environment.
 
-## Contents
+### Contents
 
 - [What AlgoForge provides](#highlights)
 - [Architecture](#system-architecture)
