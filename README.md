@@ -1,4 +1,4 @@
-## AlgoForge
+# AlgoForge
 
 > A full-stack coding-practice platform for solving algorithm problems, receiving secure code-execution results, tracking progress, and competing on a leaderboard.
 
