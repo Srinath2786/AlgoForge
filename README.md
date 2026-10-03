@@ -1,926 +1,316 @@
-# ⚡ AlgoForge
+# AlgoForge
 
-### Full-Stack Coding Practice & Performance Assessment Platform
+> A full-stack coding-practice platform for solving algorithm problems, receiving secure code-execution results, tracking progress, and competing on a leaderboard.
 
-> **Practice. Code. Submit. Improve.**
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-6DB33F?logo=springboot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Sandboxed%20execution-2496ED?logo=docker&logoColor=white)
 
-AlgoForge is a full-stack coding practice platform designed to provide a structured environment for solving algorithmic problems, running code, submitting solutions against hidden test cases, tracking performance, and competing through leaderboards.
+AlgoForge brings the core coding-platform workflow into one place: discover a problem, write and run code in the browser, submit against hidden tests, and review your progress over time.
 
+![AlgoForge problem workspace](docs/screenshots/screenshot-01.png)
 
+## Quick start
 
-## ✨ Overview
-
-AlgoForge provides an end-to-end coding practice experience:
-
-```text
-Discover Problem
-       ↓
-Read Problem Statement
-       ↓
-Write Code in Browser
-       ↓
-Run Sample Tests
-       ↓
-Submit Solution
-       ↓
-Hidden Test Evaluation
-       ↓
-View Submission Result
-       ↓
-Track Progress
-       ↓
-Compete on Leaderboard
-```
-
-The platform supports multiple programming languages and uses Docker-based isolated execution for submitted programs.
-
----
-
-## 🚀 Key Features
-
-### 👨‍💻 Coding Practice
-
-* Browse algorithm and programming problems
-* View problem statements and test cases
-* Write code directly in the browser
-* Monaco-based code editor
-* Run sample test cases
-* Submit solutions for official evaluation
-* Receive execution and grading results
-
-### 🧪 Online Judge
-
-AlgoForge provides two submission modes:
-
-| Mode                    | Purpose                                                     |
-| ----------------------- | ----------------------------------------------------------- |
-| **Sample Run**          | Quickly test code against sample cases                      |
-| **Official Submission** | Evaluate the solution against visible and hidden test cases |
-
-The platform keeps hidden test cases protected from normal users while using them for server-side evaluation.
-
-### 🐳 Secure Code Execution
-
-Submitted programs are executed inside Docker-based isolated environments.
-
-The execution system supports:
-
-* Network restrictions
-* Memory limits
-* CPU limits
-* PID limits
-* Execution timeouts
-* Read-only filesystem
-* Unprivileged execution user
-
-This provides an additional isolation layer between submitted code and the host environment.
-
-### 🔐 Authentication & Authorization
-
-* User registration
-* User login
-* JWT-based authentication
-* Protected API endpoints
-* Role-based authorization
-* Admin-only operations
-* Secure password hashing
-
-### 🛠️ Admin Management
-
-Administrators can manage:
-
-* Problems
-* Test cases
-* Users
-* Weekly challenges
-* Problem content
-* Hidden judge data
-
-### 📊 Dashboard
-
-Users can track their coding activity through:
-
-* Problem-solving progress
-* Activity history
-* Solved problems
-* Submission information
-* Profile information
-* Performance statistics
-
-### 🏆 Leaderboard
-
-AlgoForge includes a public leaderboard that allows users to compare their coding progress and performance with other platform users.
-
-### 📅 Weekly Challenges
-
-The platform supports weekly challenges shared across users and devices, providing a structured way to practice consistently.
-
-### 📱 Responsive Workspace
-
-The coding workspace is designed around a practical split layout:
-
-```text
-┌──────────────────────────────────────────────────────┐
-│                    AlgoForge                         │
-├───────────────────────┬──────────────────────────────┤
-│                       │                              │
-│   Problem Statement   │       Code Editor            │
-│                       │                              │
-│   Examples            │       Monaco Editor          │
-│                       │                              │
-│   Constraints         │                              │
-│                       │                              │
-├───────────────────────┴──────────────────────────────┤
-│              Run / Submit / Results                  │
-└──────────────────────────────────────────────────────┘
-```
-
----
-
-## 🖥️ Screenshots
-
-### Dashboard
-
-![AlgoForge Dashboard](docs/screenshots/screenshot-02.png)
-
-### Coding Workspace
-
-![AlgoForge Coding Workspace](docs/screenshots/screenshot-03.png)
-
-### Leaderboard
-
-![AlgoForge Leaderboard](docs/screenshots/screenshot-04.png)
-
-Additional screenshots are available in:
-
-```text
-docs/screenshots/
-```
-
----
-
-# 🏗️ System Architecture
-
-AlgoForge follows a modular full-stack architecture.
-
-```text
-                     ┌───────────────────────┐
-                     │      User Browser     │
-                     │                       │
-                     │ React + TypeScript    │
-                     │ Vite + Monaco Editor  │
-                     └───────────┬───────────┘
-                                 │
-                              HTTP/REST
-                              + JWT
-                                 │
-                                 ▼
-                     ┌───────────────────────┐
-                     │    Spring Boot API    │
-                     │                       │
-                     │ Authentication        │
-                     │ Problems              │
-                     │ Submissions           │
-                     │ Dashboard             │
-                     │ Challenges            │
-                     │ Leaderboard           │
-                     │ Users                 │
-                     └───────┬─────────┬─────┘
-                             │         │
-                    ┌────────▼───┐ ┌──▼──────────────┐
-                    │ PostgreSQL │ │ Docker Sandbox  │
-                    │            │ │                │
-                    │ Flyway     │ │ Code Execution │
-                    │ Migrations │ │ & Evaluation   │
-                    └────────────┘ └─────────────────┘
-```
-
-### Application Flow
-
-```text
-Frontend
-   │
-   │ REST API + JWT
-   ▼
-Spring Boot
-   │
-   ├── Authentication
-   ├── Problem Management
-   ├── Submission Management
-   ├── Judge / Execution
-   ├── Dashboard
-   ├── Challenges
-   └── Leaderboard
-   │
-   ├──────────────► PostgreSQL
-   │
-   └──────────────► Docker Execution Sandbox
-```
-
----
-
-# 🛠️ Technology Stack
-
-## Frontend
-
-* React 18
-* TypeScript
-* Vite
-* Tailwind CSS
-* React Query
-* Zustand
-* Monaco Editor
-
-## Backend
-
-* Java 17
-* Spring Boot 3
-* Spring Security
-* Spring Data JPA
-* Maven
-
-## Database
-
-* PostgreSQL
-* Flyway
-
-## Code Execution
-
-* Docker
-* Java
-* Python
-* C++
-* Node.js
-
-## API
-
-* REST API
-* JWT Authentication
-* Swagger UI
-* OpenAPI
-
-The documented stack uses React 18/TypeScript on the frontend and Java 17/Spring Boot 3 on the backend.
-
----
-
-# 📂 Project Structure
-
-```text
-AlgoForge/
-│
-├── algoforge-frontend/
-│   │
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── lib/
-│   │   │   └── services/
-│   │   ├── store/
-│   │   └── types/
-│   │
-│   ├── .env.example
-│   └── package.json
-│
-├── coding-platform-backend/
-│   │
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   │   └── ...
-│   │   │   └── resources/
-│   │   │       └── db/
-│   │   │           └── migration/
-│   │   │
-│   │   └── test/
-│   │
-│   ├── docker/
-│   ├── pom.xml
-│   └── docker-compose.yml
-│
-├── docs/
-│   ├── screenshots/
-│   └── InfosysSpringboardInternshipReport.docx
-│
-├── README.md
-└── .gitignore
-```
-
----
-
-# 🎨 Frontend Architecture
-
-The frontend is a React + TypeScript application powered by Vite.
-
-### Main areas
-
-```text
-src/
-│
-├── components/
-│   ├── Dashboard
-│   ├── Landing
-│   ├── Workspace
-│   └── Challenge components
-│
-├── pages/
-│   └── Application screens
-│
-├── lib/
-│   └── services/
-│       └── REST API clients
-│
-├── store/
-│   └── Authentication & theme state
-│
-└── types/
-    └── API contracts
-```
-
-The application uses Zustand for client-side authentication/theme state and React Query for API-related data management.
-
----
-
-# ⚙️ Backend Architecture
-
-The Spring Boot backend is organized into modular feature areas.
-
-```text
-Backend
-│
-├── auth/
-│   └── Registration & Login
-│
-├── security/
-│   └── JWT & Role Authorization
-│
-├── problem/
-│   └── Problem Management
-│
-├── testcase/
-│   └── Judge Test Cases
-│
-├── submission/
-│   └── Submission Workflow
-│
-├── submissionresult/
-│   └── Evaluation Results
-│
-├── execution/
-│   └── Code Execution
-│
-├── docker/
-│   └── Isolated Containers
-│
-├── dashboard/
-│   └── User Progress
-│
-├── leaderboard/
-│   └── Rankings
-│
-├── challenge/
-│   └── Weekly Challenges
-│
-├── user/
-│   └── User & Profile Management
-│
-└── resources/db/migration/
-    └── Flyway Database Migrations
-```
-
----
-
-# 🗄️ Database
-
-PostgreSQL is used as the primary relational database.
-
-The database stores information related to:
-
-* Users
-* Roles
-* Problems
-* Test cases
-* Submissions
-* Submission results
-* Leaderboard information
-* Weekly challenges
-
-Flyway manages database schema changes through versioned migrations.
-
-```text
-Application Start
-       ↓
-Flyway
-       ↓
-Check Migration History
-       ↓
-Apply Pending Migrations
-       ↓
-Spring Boot Application
-```
-
-Migration files follow the format:
-
-```text
-V<version>__<description>.sql
-```
-
-For example:
-
-```text
-V1__initial_schema.sql
-V2__add_submission_results.sql
-V3__add_weekly_challenges.sql
-```
-
-> Existing migrations should not be edited after they have been applied to an environment. Add a new migration for future schema changes.
-
----
-
-# 🔐 Security
-
-Security is an important part of AlgoForge.
-
-### Authentication
-
-```text
-User
- │
- ├── Register
- │
- └── Login
-       │
-       ▼
-   Spring Security
-       │
-       ▼
-    JWT Token
-       │
-       ▼
-Authenticated API Requests
-```
-
-### Security features
-
-* Password hashing through Spring Security
-* JWT authentication
-* Protected API routes
-* Role-based authorization
-* Admin-only endpoints
-* Hidden test-case protection
-* Docker execution isolation
-
-### Hidden Test Cases
-
-Normal users can access visible problem information, but hidden judge cases are not exposed through public problem APIs.
-
-This allows the backend to evaluate official submissions without revealing the complete test suite.
-
----
-
-# 🐳 Docker Code Execution
-
-One of AlgoForge's core components is its isolated code execution workflow.
-
-```text
-User submits code
-       │
-       ▼
-Spring Boot API
-       │
-       ▼
-Submission Service
-       │
-       ▼
-Docker Execution Manager
-       │
-       ▼
-Isolated Container
-       │
-       ├── Compile
-       ├── Execute
-       ├── Apply limits
-       └── Capture result
-       │
-       ▼
-Submission Result
-       │
-       ▼
-Frontend
-```
-
-Execution environments apply restrictions including:
-
-* Disabled network access
-* Memory limits
-* CPU limits
-* PID limits
-* Execution timeouts
-* Read-only root filesystem
-* Unprivileged execution
-
-This execution model is intended to provide isolation for submitted programs.
-
----
-
-# 🌐 REST API
-
-The backend exposes REST endpoints for the major platform features.
-
-### Authentication
-
-```http
-POST /api/auth/register
-POST /api/auth/login
-```
-
-### Problems
-
-```http
-GET /api/problems
-GET /api/problems/{id}
-```
-
-### Submissions
-
-```http
-POST /api/submissions
-GET /api/submissions/me
-GET /api/submissions/{id}
-GET /api/submissions/{id}/results
-GET /api/submissions/me/solved-problems
-```
-
-### Dashboard
-
-```http
-GET /api/dashboard
-GET /api/dashboard/activity
-```
-
-### Challenges
-
-```http
-GET /api/challenges/weekly
-```
-
-### User
-
-```http
-GET /api/users/me
-GET /api/users/me/dashboard
-PUT /api/users/me/profile
-```
-
-### Leaderboard
-
-```http
-GET /api/leaderboard
-```
-
-### Admin
-
-```http
-GET /api/admin/users
-```
-
-Additional problem and test-case administration endpoints are available for administrators.
-
----
-
-# 📚 API Documentation
-
-Swagger UI:
-
-```text
-http://localhost:8080/swagger-ui.html
-```
-
-OpenAPI specification:
-
-```text
-http://localhost:8080/v3/api-docs
-```
-
-Authenticated API requests use:
-
-```http
-Authorization: Bearer <JWT_TOKEN>
-```
-
----
-
-# 🚀 Getting Started
-
-## Prerequisites
-
-Install the following before starting AlgoForge:
-
-* Node.js 20+
-* Java 17+
-* Maven 3.9+
-* Docker Desktop
-* Git
-
-Verify your installations:
+The fastest local setup is:
 
 ```powershell
-node --version
-java --version
-mvn --version
-docker --version
-git --version
-```
-
----
-
-# 1️⃣ Clone the Repository
-
-```powershell
-git clone https://github.com/Srinath2786/AlgoForge.git
-cd AlgoForge
-```
-
----
-
-# 2️⃣ Start PostgreSQL
-
-Navigate to the backend:
-
-```powershell
+# Terminal 1: database
 cd coding-platform-backend
-```
-
-Start PostgreSQL:
-
-```powershell
 docker compose up -d postgres
-```
 
-Check the running containers:
-
-```powershell
-docker compose ps
-```
-
----
-
-# 3️⃣ Configure the Backend
-
-Set the required environment variables:
-
-```powershell
+# Terminal 2: API
+cd coding-platform-backend
 $env:DB_PASSWORD = "1234"
 $env:JWT_SECRET = "replace-this-with-a-long-random-secret"
 $env:SPRING_PROFILES_ACTIVE = "demo"
-```
-
-> For real deployments, always use a strong unique JWT secret and secure database credentials.
-
----
-
-# 4️⃣ Start the Backend
-
-From:
-
-```text
-AlgoForge/coding-platform-backend
-```
-
-run:
-
-```powershell
 mvn spring-boot:run
-```
 
-The API will be available at:
-
-```text
-http://localhost:8080
-```
-
----
-
-# 5️⃣ Start the Frontend
-
-Open a new terminal:
-
-```powershell
+# Terminal 3: web app
 cd algoforge-frontend
-```
-
-Install dependencies:
-
-```powershell
 npm install
-```
-
-Create the environment file:
-
-```powershell
 Copy-Item .env.example .env -ErrorAction SilentlyContinue
-```
-
-Set:
-
-```env
-VITE_API_BASE_URL=http://localhost:8080
-```
-
-Start the development server:
-
-```powershell
 npm run dev
 ```
 
-Open:
+Open `http://localhost:5173`. The API is available at `http://localhost:8080`.
+
+When the `demo` profile is enabled, use the seeded admin account for local exploration:
+
+| Username | Password |
+| --- | --- |
+| `admin` | `Admin@123` |
+
+These credentials are for local demo use only. Do not use them in a deployed environment.
+
+### Contents
+
+- [What AlgoForge provides](#highlights)
+- [Architecture](#system-architecture)
+- [Repository layout](#repository-layout)
+- [Technology stack](#technology-stack)
+- [Run locally](#run-locally)
+- [REST API](#rest-api)
+- [Security model](#security-model)
+- [Testing and build](#testing-and-build)
+- [Configuration reference](#configuration-reference)
+- [Troubleshooting](#troubleshooting)
+- [Roadmap](#roadmap)
+
+| Quick links | |
+| --- | --- |
+| Project report | [Download the Infosys Springboard internship report](docs/InfosysSpringboardInternshipReport.docx) |
+| Screenshots | [Browse the project screenshots](docs/screenshots/) |
+| Frontend | [`algoforge-frontend/`](algoforge-frontend/) |
+| Backend API | [`coding-platform-backend/`](coding-platform-backend/) |
+
+> GitHub does not preview this Word file because of its size. Open the report link above and choose **Download raw** to view it locally.
+
+The platform is built as a modular React + Spring Boot application with PostgreSQL, Flyway schema migrations, JWT authentication, and Docker-based code execution.
+
+## Highlights
+
+- Solve problems in Java, Python, C++, and JavaScript
+- Run sample tests or submit against visible and hidden judge cases
+- Docker-isolated code execution with network, memory, CPU, PID, and filesystem limits
+- JWT authentication and role-based user/admin access
+- Admin problem and test-case management
+- Weekly challenges shared across every user and device
+- Dashboard, activity graph, profile, submissions, and leaderboard
+- Responsive workspace with independently scrollable problem and editor panels on desktop
+
+## Screenshots
+
+The interface is organized around repeated practice: choose a problem, work in the editor, inspect results, and follow progress from the dashboard.
+
+<p>
+        <img src="docs/screenshots/screenshot-02.png" alt="AlgoForge dashboard" width="32%" />
+        <img src="docs/screenshots/screenshot-03.png" alt="AlgoForge coding workspace" width="32%" />
+        <img src="docs/screenshots/screenshot-04.png" alt="AlgoForge leaderboard" width="32%" />
+</p>
+
+See the complete [screenshot collection](docs/screenshots/) for additional screens.
+
+## System architecture
 
 ```text
-http://localhost:5173
+React + Vite frontend (localhost:5173)
+        |
+        | HTTP / REST + JWT (local development)
+        v
+Spring Boot REST API (localhost:8080)
+        |                 |
+        v                 v
+PostgreSQL + Flyway   Docker execution sandbox
 ```
 
----
-
-# 🔑 Demo Account
-
-When running with the `demo` Spring profile, the local demo account is:
+## Repository layout
 
 ```text
-Username: admin
-Password: Admin@123
+AlgoForge/
+├── algoforge-frontend/        # React + TypeScript user interface
+├── coding-platform-backend/   # Spring Boot REST API and execution service
+├── docs/                      # Project documentation, report, and screenshots
+├── README.md                  # Setup, architecture, API, and operations guide
+└── .gitignore                 # Local build, secret, and runtime exclusions
 ```
 
-⚠️ **Do not use these credentials in a deployed production environment.**
+### Frontend
 
----
+`algoforge-frontend/` is a React 18 + TypeScript application powered by Vite.
 
-# 🐳 Run the Complete Backend Stack with Docker
+- `src/pages/` — application routes and feature screens
+- `src/components/` — reusable UI, dashboard, landing, and challenge components
+- `src/lib/services/` — typed REST API clients
+- `src/store/` — Zustand authentication and theme state
+- `src/types/` — frontend API contracts
 
-If you want Docker Compose to build and run the API and database:
+### Backend
+
+`coding-platform-backend/` is a Java 17 Spring Boot API.
+
+- `auth/` — registration and login
+- `security/` — JWT authentication, roles, and route protection
+- `problem/` and `testcase/` — problem catalog and judge test cases
+- `submission/`, `submissionresult/`, and `execution/` — grading workflow
+- `docker/` — isolated compile/run container management
+- `dashboard/`, `leaderboard/`, and `challenge/` — learner progress and competition features
+- `user/` — profile and admin user management
+- `resources/db/migration/` — versioned Flyway database migrations
+
+### Database
+
+PostgreSQL stores users, roles, problems, test cases, submissions, submission results, leaderboard data, and weekly challenges. Flyway applies database changes in order whenever the backend starts.
+
+## Technology stack
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS, React Query, Zustand, Monaco Editor |
+| Backend | Java 17, Spring Boot 3, Spring Security, Spring Data JPA |
+| Database | PostgreSQL, Flyway |
+| Code execution | Docker, Java, Python, C++, Node.js |
+| API documentation | Swagger UI / OpenAPI |
+
+## Run locally
+
+### Prerequisites
+
+- Node.js 20+
+- Java 17+
+- Maven 3.9+
+- Docker Desktop (running)
+
+### 1. Start PostgreSQL
+
+```powershell
+cd coding-platform-backend
+docker compose up -d postgres
+```
+
+### 2. Start the backend
+
+```powershell
+cd coding-platform-backend
+$env:DB_PASSWORD = "1234"
+$env:JWT_SECRET = "replace-this-with-a-long-random-secret"
+$env:SPRING_PROFILES_ACTIVE = "demo"  # local demo problems/admin only
+mvn spring-boot:run
+```
+
+The API runs at `http://localhost:8080`.
+
+### 3. Start the frontend
+
+Open another terminal:
+
+```powershell
+cd algoforge-frontend
+npm install
+Copy-Item .env.example .env -ErrorAction SilentlyContinue
+npm run dev
+```
+
+Open `http://localhost:5173`.
+
+Set `VITE_API_BASE_URL=http://localhost:8080` in `algoforge-frontend/.env` when needed.
+
+### Optional: run the complete stack with Docker Compose
+
+The backend Compose service also builds and runs the API. It mounts the host Docker socket so submitted programs can launch isolated execution containers:
 
 ```powershell
 cd coding-platform-backend
 docker compose up --build
 ```
 
-The frontend continues to run separately:
+Use this option when Docker Desktop is available and you want the API and database managed together. The frontend still runs separately with `npm run dev`.
 
-```powershell
-cd algoforge-frontend
-npm run dev
+## REST API
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+Send authenticated requests with:
+
+```http
+Authorization: Bearer <JWT_TOKEN>
 ```
 
----
+| Area | Endpoints | Access |
+| --- | --- | --- |
+| Authentication | `POST /api/auth/register`, `POST /api/auth/login` | Public |
+| Problems | `GET /api/problems`, `GET /api/problems/{id}` | Public |
+| Problem administration | `POST/PUT/DELETE /api/problems` | Admin |
+| Test cases | `GET /api/problems/{id}/testcases` | Public, visible cases only |
+| Test-case administration | `GET /all`, `POST`, `PUT`, `DELETE /api/problems/{id}/testcases...` | Admin only |
+| Submissions | `POST /api/submissions`, `GET /api/submissions/me`, `GET /api/submissions/{id}`, `GET /api/submissions/{id}/results`, `GET /api/submissions/me/solved-problems` | Authenticated |
+| Hints/editorial | `GET /api/problems/{id}/hints`, `/editorial` | Authenticated |
+| Dashboard | `GET /api/dashboard`, `/api/dashboard/activity` | Authenticated |
+| Challenges | `GET /api/challenges/weekly` | Authenticated |
+| Challenge administration | `PUT/DELETE /api/challenges/weekly/{dayOfWeek}` | Admin |
+| Users | `GET /api/users/me`, `GET /api/users/me/dashboard`, `PUT /api/users/me/profile` | Authenticated |
+| User administration | `GET /api/admin/users` | Admin |
+| Leaderboard | `GET /api/leaderboard` | Public |
 
-# 🧪 Testing
+`POST /api/submissions` supports both actions: use `sampleRunOnly: true` for a sample run or `false` for an official submission.
 
-## Frontend Build
+## Security model
+
+- Passwords are hashed through Spring Security.
+- JWT secures authenticated routes.
+- Admin endpoints require the `ADMIN` role in both the frontend and backend.
+- Hidden test cases are never returned by public problem endpoints.
+- Execution containers use disabled network access, a read-only root filesystem, an unprivileged user, memory/CPU/PID limits, and execution timeouts.
+- Demo data is restricted to the `demo` profile; do not use it in production.
+
+## Testing and build
 
 ```powershell
+# Frontend
 cd algoforge-frontend
 npm run build
-```
 
-## Backend Tests
-
-```powershell
+# Backend
 cd coding-platform-backend
 mvn test
-```
-
-## Backend Package
-
-```powershell
 mvn package
 ```
 
-## Test Without Docker Execution
-
-The test profile uses an in-memory H2 database and disables Flyway/Docker execution:
+Run the backend tests without Docker execution:
 
 ```powershell
+cd coding-platform-backend
 mvn test "-Dspring.profiles.active=test"
 ```
 
----
+The backend test profile uses an in-memory H2 database and disables Flyway and Docker execution:
 
-# 🔧 Configuration
+## Database and Flyway workflow
 
-### Frontend
+The backend applies SQL migrations from `coding-platform-backend/src/main/resources/db/migration/` during startup. Migration files use `V<version>__<description>.sql`; Flyway records completed migrations in the `flyway_schema_history` table.
 
-```env
-VITE_API_BASE_URL=http://localhost:8080
-```
+To change the schema, add a new next-numbered, forward-only migration and commit it with its matching Java changes. Do not edit a migration that may already have been applied by another environment.
 
-### Backend
-
-| Variable                   | Purpose                       |
-| -------------------------- | ----------------------------- |
-| `DB_PASSWORD`              | PostgreSQL password           |
-| `JWT_SECRET`               | JWT signing secret            |
-| `DOCKER_EXECUTION_ENABLED` | Enable/disable code execution |
-| `APP_CORS_ALLOWED_ORIGINS` | Allowed frontend origins      |
-
-Example:
+For an intentionally fresh local database only:
 
 ```powershell
-$env:DB_PASSWORD = "1234"
-$env:JWT_SECRET = "your-long-random-secret"
-$env:DOCKER_EXECUTION_ENABLED = "true"
+cd coding-platform-backend
+docker compose down -v
+docker compose up -d postgres
 ```
 
----
+`docker compose down -v` deletes the local PostgreSQL volume, so do not use it when the database contains data you need.
 
-# 🛠️ Troubleshooting
+## Configuration reference
 
-### PostgreSQL connection error
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | `http://localhost:8080` | Frontend API address; restart Vite after changing `.env`. |
+| `DB_PASSWORD` | `1234` | Must match the PostgreSQL Compose password. |
+| `JWT_SECRET` | development fallback | Always set a long, unique value outside local development. |
+| `DOCKER_EXECUTION_ENABLED` | `true` | Set `false` to start the API without the code runner. |
+| `APP_CORS_ALLOWED_ORIGINS` | local Vite origins | Comma-separated allowed browser origins. |
 
-Check Docker:
+## Troubleshooting
 
-```powershell
-docker compose ps
-```
+| Symptom | Resolution |
+| --- | --- |
+| Backend cannot connect to PostgreSQL | Run `docker compose ps`; confirm PostgreSQL is healthy and `DB_PASSWORD` is `1234` (or matches your override). |
+| Frontend cannot call the API | Check that the API is running on port 8080 and `VITE_API_BASE_URL` is correct. |
+| Browser shows a CORS error | Add the browser origin/port to `APP_CORS_ALLOWED_ORIGINS`. |
+| A submission does not run | Start Docker Desktop and confirm `DOCKER_EXECUTION_ENABLED` is not `false`. |
+| Flyway reports a local migration failure | Inspect backend logs and `flyway_schema_history`; recreate the database volume only if data loss is acceptable. |
 
-Make sure PostgreSQL is running and the configured password matches the Compose configuration.
+## Git workflow
 
-### Frontend cannot connect to backend
+This local repository is connected to:
 
-Verify:
+`https://github.com/Srinath2786/AlgoForge`
 
-```text
-Backend:
-http://localhost:8080
-
-Frontend:
-http://localhost:5173
-```
-
-Check:
-
-```env
-VITE_API_BASE_URL=http://localhost:8080
-```
-
-Restart Vite after changing `.env`.
-
-### CORS error
-
-Verify that the frontend origin is included in:
-
-```text
-APP_CORS_ALLOWED_ORIGINS
-```
-
-### Submission does not execute
-
-Make sure:
-
-1. Docker Desktop is running.
-2. Docker execution is enabled.
-3. The backend can access the Docker environment.
-
-```powershell
-docker ps
-```
-
-### Flyway migration error
-
-Inspect:
-
-```text
-flyway_schema_history
-```
-
-Only recreate the local database volume when you are certain that existing local data can be deleted.
-
----
-
-# 🧭 Development Workflow
-
-A typical development workflow is:
-
-```text
-Create Feature
-     ↓
-Create Feature Branch
-     ↓
-Implement Changes
-     ↓
-Run Frontend Build
-     ↓
-Run Backend Tests
-     ↓
-Test API
-     ↓
-Test UI
-     ↓
-Commit Changes
-     ↓
-Push Branch
-     ↓
-Create Pull Request
-```
-
-Recommended Git workflow:
+Use feature branches and pull the remote branch before pushing when Git reports a non-fast-forward rejection:
 
 ```powershell
 git fetch origin
@@ -928,103 +318,16 @@ git pull --rebase origin main
 git push -u origin main
 ```
 
-Avoid force-pushing unless you understand exactly which remote commits would be replaced.
+Resolve any conflicts before continuing the rebase. Never force-push unless you understand which remote commits would be replaced.
 
----
+## Roadmap
 
-# 📈 Future Roadmap
+- Structured DSA learning paths and spaced revision
+- Private notes and bookmarks
+- Personalized recommendations and failure analysis
+- Timed contests and private classroom/company rooms
+- Queue-based judge workers for larger-scale execution
 
-Planned improvements include:
+## License
 
-* Structured DSA learning paths
-* Spaced-revision support
-* Private notes
-* Problem bookmarks
-* Personalized recommendations
-* Failure analysis
-* Timed contests
-* Private classroom rooms
-* Company-specific practice rooms
-* Queue-based judge workers for larger-scale execution
-
-These roadmap items are future directions and are not presented as currently implemented features.
-
----
-
-# 📄 Project Documentation
-
-The repository includes project documentation and screenshots:
-
-```text
-docs/
-├── screenshots/
-└── InfosysSpringboardInternshipReport.docx
-```
-
-The project report can be found at:
-
-```text
-docs/InfosysSpringboardInternshipReport.docx
-```
-
----
-
-# 🎓 Project Context
-
-**AlgoForge** was developed as part of the **Infosys Springboard Internship 7.0** project work.
-
-The project focuses on building a practical coding-practice and performance-assessment platform with:
-
-* Full-stack web development
-* REST API development
-* Authentication and authorization
-* Database management
-* Code execution
-* Hidden test evaluation
-* User progress tracking
-* Leaderboard functionality
-
----
-
-# 👨‍💻 Author
-
-### Srinath M
-
-**Java Full-Stack Developer | Backend Developer**
-
-GitHub:
-https://github.com/Srinath2786
-
-LinkedIn:
-https://www.linkedin.com/in/srinathm-java/
-
-Portfolio:
-https://srinathcse.netlify.app/
-
----
-
-# ⭐ Repository
-
-If you find AlgoForge useful or interesting, consider giving the repository a ⭐.
-
-```text
-https://github.com/Srinath2786/AlgoForge
-```
-
----
-
-# 📜 License
-
-No license has currently been selected for this repository.
-
-If you intend to allow public reuse, add an appropriate `LICENSE` file before publishing the project for reuse.
-
----
-
-## ⚡ AlgoForge
-
-```text
-Practice smarter.
-Write better code.
-Solve more problems.
-```
+No license has been selected yet. Add a `LICENSE` file before publishing the project for public reuse.
