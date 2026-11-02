@@ -7,7 +7,6 @@
 AlgoForge is a full-stack coding practice platform designed to provide a structured environment for solving algorithmic problems, running code, submitting solutions against hidden test cases, tracking performance, and competing through leaderboards.
 
 Built with **React, TypeScript, Spring Boot, PostgreSQL, Docker, and JWT authentication**, AlgoForge brings the essential coding-platform workflow into a single modern web application.
-
 ---
 
 ## ✨ Overview
